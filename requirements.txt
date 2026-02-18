@@ -1,0 +1,19 @@
+fastapi
+uvicorn
+python-dotenv
+openai>=1.6.0
+reportlab
+sounddevice
+scipy
+numpy
+librosa
+python-multipart
+openai-whisper
+# ✅ PRODUCTION UPGRADES
+fasttext==0.9.2
+ai4bharat-indic-nlp
+psycopg2-binary
+sqlalchemy
+uvloop
+python-json-logger
+cryptography

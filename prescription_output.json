@@ -1,0 +1,55 @@
+[
+  {
+    "success": true,
+    "prescription_id": 28,
+    "data": {
+      "patient_name": "Rogit",
+      "age": null,
+      "language": "en",
+      "complaints": [
+        "difficulty breathing",
+        "throat pain",
+        "fever",
+        "infection",
+        "discomfort"
+      ],
+      "diagnosis": [
+        "bacterial throat infection",
+        "infection"
+      ],
+      "medicines": [
+        {
+          "name": "Erythromycin",
+          "dose": "500 mg",
+          "frequency": "3 times a day",
+          "duration": "5 days",
+          "instruction": "",
+          "route": "oral",
+          "side_effects": []
+        }
+      ],
+      "tests": [],
+      "advice": [
+        "Take erythromycin after food to avoid stomach discomfort",
+        "Complete the full 5 day course of antibiotics",
+        "Drink plenty of warm fluids",
+        "Do warm salt water gargles 3-4 times a day",
+        "Avoid very cold drinks",
+        "Avoid spicy food",
+        "Avoid oily food",
+        "Rest your voice as much as possible",
+        "Watch for side effects like nausea, loose stools, or stomach upset",
+        "Contact doctor if you develop severe diarrhea, vomiting, skin rash, itching, swelling, or difficulty breathing",
+        "Come for review follow up after 5 days or earlier if symptoms do not improve",
+        "If fever persists beyond 2-3 days or if you have difficulty swallowing or breathing, seek medical attention"
+      ],
+      "timestamp": "2026-02-18T20:16:35.340030",
+      "confidence": 0.6862736701965332,
+      "doctor_id": "unknown",
+      "doctor_approved": false,
+      "approval_timestamp": null,
+      "extraction_method": "smart-rules",
+      "warnings": []
+    }
+  }
+]
