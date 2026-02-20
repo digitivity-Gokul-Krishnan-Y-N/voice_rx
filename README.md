@@ -1,321 +1,338 @@
-# Voice RX - AI Medical Prescription System
+# Medical Prescription Extraction System
 
-An advanced AI-powered medical prescription extraction system that converts doctor-patient consultations from audio (speech) into structured, validated prescriptions using Whisper ASR and rule-based extraction.
+A production-grade multilingual medical consultation transcription and prescription extraction system using OpenAI/local Whisper and Groq LLM APIs.
 
-## Features
+## 🎯 Features
 
-✅ **Speech-to-Text Transcription**
-- Whisper ASR (base model) for accurate audio transcription
-- Automatic language detection (English, Tamil, Telugu support)
-- Audio preprocessing and normalization
+- **Multilingual Audio Transcription**: Handles English, Tamil, and Thanglish with automatic language detection
+- **Advanced Prescription Extraction**: Extracts patient name, complaints, diagnoses, medicines, tests, and advice
+- **Groq LLM Integration**: Uses Groq's fast open-source models for intelligent data extraction
+- **Intelligent Routing**: Quality-based routing between Groq extraction and rule-based fallback
+- **Validation Layer**: Comprehensive validation with error and warning reporting
+- **Database Storage**: SQLite integration for prescription persistence
+- **Metrics Collection**: Performance tracking and quality metrics
 
-✅ **Smart Prescription Extraction**
-- Patient name recognition
-- Diagnosis extraction with context awareness
-- Medicine identification with dosage, frequency, and duration
-- Complaint/symptom extraction
-- Medical advice generation (12 standard phrases)
-- Test/investigation recommendations
-
-✅ **Medical Database**
-- 100+ medicines across 12 categories
-- Drug interaction warnings
-- Dangerous combination detection
-- Transcription error corrections (50+ patterns)
-
-✅ **Validation & Safety**
-- Prescription validation (required fields, dose formats)
-- Drug interaction checking
-- Duplicate medicine detection
-- Safety warnings and alerts
-
-✅ **Database Persistence**
-- SQLite database for prescription storage
-- Structured data models (Prescription, Medicine, Patient)
-- Audit trail with timestamps
-
-✅ **Multi-lingual Support**
-- English transcription
-- Tanglish/Transliteration handling
-- Language auto-detection with fallback
-
-## System Architecture
+## 🏗️ System Architecture
 
 ```
-┌─────────────────────────────────────┐
-│  Audio Input (MP3/WAV)              │
-└────────────┬────────────────────────┘
-             │
-┌────────────▼────────────────────────┐
-│  Speech Recognition (Whisper)        │
-│  - Audio preprocessing               │
-│  - Language detection                │
-└────────────┬────────────────────────┘
-             │
-┌────────────▼────────────────────────┐
-│  Extraction Engine                   │
-│  - Patient name extraction           │
-│  - Diagnosis extraction              │
-│  - Medicine extraction               │
-│  - Advice generation                 │
-└────────────┬────────────────────────┘
-             │
-┌────────────▼────────────────────────┐
-│  Validation Layer                    │
-│  - Format validation                 │
-│  - Drug interaction check            │
-│  - Safety warnings                   │
-└────────────┬────────────────────────┘
-             │
-┌────────────▼────────────────────────┐
-│  Database Storage (SQLite)           │
-│  - Prescription persistence          │
-│  - Audit trail                       │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Medical System V2                         │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+        ┌─────────────────────────────────────┐
+        │  [1] Audio Transcription            │
+        │      (Whisper - local/OpenAI)       │
+        └─────────────────────────────────────┘
+                            ↓
+        ┌─────────────────────────────────────┐
+        │  [2] Transcript Cleaning            │
+        │      (ASR distortion fixes)         │
+        └─────────────────────────────────────┘
+                            ↓
+        ┌─────────────────────────────────────┐
+        │  [3] Language Detection             │
+        │      (EN/TA/Thanglish)              │
+        └─────────────────────────────────────┘
+                            ↓
+        ┌─────────────────────────────────────┐
+        │  [4] Thanglish Normalization        │
+        │      (if needed)                    │
+        └─────────────────────────────────────┘
+                            ↓
+        ┌─────────────────────────────────────┐
+        │  [5] Transcript Normalization       │
+        │      (dosage standardization)       │
+        └─────────────────────────────────────┘
+                            ↓
+        ┌─────────────────────────────────────┐
+        │  [6] Intelligent Routing            │
+        ├─────────────────────────────────────┤
+        │  ✓ Groq Extraction (primary)        │
+        │  ✗ Rules-based Extraction (fallback)│
+        └─────────────────────────────────────┘
+                            ↓
+        ┌─────────────────────────────────────┐
+        │  [7] Validation & Storage           │
+        │      (SQLite database)              │
+        └─────────────────────────────────────┘
 ```
 
-## Project Structure
-
-```
-voice_rx/
-├── medical_system_v2.py          # Main system orchestrator
-├── medicine_database.py          # Medicine database & configurations
-├── pipeline.py                   # Alternative pipeline (GPT-4 based)
-├── doctor_review.py              # Doctor review UI module
-├── enhanced_validation.py         # Enhanced prescription validation
-├── monitoring.py                 # System monitoring & metrics
-├── smart_labeling.py             # Smart text classification
-├── requirements.txt              # Python dependencies
-├── prescriptions.db              # SQLite database
-├── frontend/                     # Web interface (HTML/CSS/JS)
-├── venv/                         # Python virtual environment
-└── README.md                     # This file
-```
-
-## Installation
+## 📦 Installation
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.9+
 - FFmpeg (for audio processing)
-- Git
+- GPU optional (faster Whisper inference)
 
 ### Setup
 
-1. **Clone the repository:**
+1. **Clone the repository**
 ```bash
-git clone https://github.com/digitivity-Gokul-Krishnan-Y-N/voice_rx.git
+git clone https://github.com/yourusername/voice_rx.git
 cd voice_rx
 ```
 
-2. **Create virtual environment:**
+2. **Create virtual environment**
 ```bash
 python -m venv venv
-# Windows
-venv\Scripts\activate
-# macOS/Linux
-source venv/bin/activate
+source venv/Scripts/activate  # Windows
+source venv/bin/activate      # Unix/macOS
 ```
 
-3. **Install dependencies:**
+3. **Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Download Whisper model:**
+4. **Configure environment**
 ```bash
-python -c "import whisper; whisper.load_model('base')"
+cp config/.env.example config/.env
+# Edit config/.env and add your API keys:
+# GROQ_API_KEY=your_groq_api_key
+# OPENAI_API_KEY=your_openai_api_key (optional, if using OpenAI Whisper)
 ```
 
-## Usage
+## 🚀 Usage
 
-### Run Medical System V2
+### Basic Usage
+
 ```bash
-python medical_system_v2.py
+python run_system.py
 ```
 
 This will:
-- Load the audio file (WhatsApp.mp3)
-- Transcribe the consultation
-- Extract prescription data
-- Validate against medical database
-- Save to SQLite database
-- Output JSON prescription
+1. Transcribe `data/Thanglish.mp3` (or configured audio file)
+2. Extract prescription data using Groq
+3. Validate the extraction
+4. Save results to `data/prescriptions.db`
+5. Output JSON to console
+
+### Configuration
+
+Edit `src/medical_system_v2.py`:
+
+```python
+# Transcription source
+WHISPER_MODEL = "medium"           # or "whisper-1" for OpenAI
+TRANSCRIBER_SOURCE = "local"       # or "openai"
+
+# Audio files to process
+AUDIO_FILES = ["data/Thanglish.mp3"]
+
+# Database
+DB_FILE = "data/prescriptions.db"
+```
 
 ### Example Output
 
 ```json
 {
-  "patient_name": "Rogit",
-  "complaints": ["throat pain", "fever", "infection"],
-  "diagnosis": ["bacterial throat infection", "acute pharyngitis"],
+  "patient_name": "Rohit",
+  "complaints": ["fever", "throat pain"],
+  "diagnosis": ["acute pharyngitis", "bacterial infection"],
   "medicines": [
     {
-      "name": "Erythromycin",
+      "name": "erythromycin",
       "dose": "500 mg",
       "frequency": "3 times a day",
-      "duration": "5 days"
+      "duration": "5 days",
+      "instruction": "after food"
     }
   ],
+  "tests": [],
   "advice": [
-    "Take erythromycin after food to avoid stomach discomfort",
-    "Complete the full 5 day course of antibiotics",
+    "Complete the full course of antibiotics",
     "Drink plenty of warm fluids",
-    "Do warm salt water gargles 3-4 times a day",
-    "Rest your voice as much as possible",
-    ...
-  ],
-  "tests": []
+    "Do warm salt water gargles 3-4 times a day"
+  ]
 }
 ```
 
-## Configuration
+## 📂 Project Structure
 
-### Medicine Database
-
-Edit `medicine_database.py` to:
-- Add/remove medicines to `KNOWN_DRUGS`
-- Add drug interactions to `DANGEROUS_COMBINATIONS`
-- Update medical term corrections in `DRUG_CORRECTIONS`
-- Modify standard advice phrases in `STANDARD_ADVICE`
-
-### Extraction Rules
-
-Modify `medical_system_v2.py`:
-- `_extract_medicines()` - Medicine pattern matching
-- `_extract_complaints()` - Symptom detection
-- `_extract_diagnosis()` - Diagnosis mapping
-- `_extract_from_keywords()` - Advice generation
-
-## Performance
-
-| Model | Speed | Accuracy | Memory |
-|-------|-------|----------|--------|
-| tiny | ~5s | 70% | 39MB |
-| base | ~20s | 85% | 140MB |
-| small | ~60s | 90% | 480MB |
-| medium | ~2min | 95% | 1.4GB |
-
-**Current:** Base model on CPU (~20 seconds per consultation)
-
-## Database Schema
-
-### prescriptions table
-- `id` (INTEGER PRIMARY KEY)
-- `patient_name` (TEXT)
-- `diagnosis` (TEXT JSON)
-- `medicines` (TEXT JSON)
-- `advice` (TEXT JSON)
-- `tests` (TEXT JSON)
-- `timestamp` (DATETIME)
-- `confidence` (FLOAT)
-
-## Dependencies
-
-- `whisper` - Speech recognition
-- `librosa` - Audio processing
-- `numpy`, `scipy` - Numerical computation
-- `sqlite3` - Database (built-in)
-- `regex` - Pattern matching
-- `python-dotenv` - Environment variables
-
-See `requirements.txt` for complete list.
-
-## Troubleshooting
-
-### Issue: "Whisper model not found"
-```bash
-python -c "import whisper; whisper.load_model('base')"
+```
+voice_rx/
+├── src/
+│   ├── medical_system_v2.py      # Main system orchestration
+│   ├── transcription.py          # Whisper integration
+│   ├── extraction.py             # Groq LLM extraction
+│   ├── validation.py             # Prescription validation
+│   ├── normalization.py          # Text normalization
+│   ├── language_detection.py     # Language identification
+│   ├── thanglish_normalizer.py   # Thanglish→Tamil conversion
+│   ├── routing.py                # Quality-based routing
+│   ├── metrics.py                # Performance metrics
+│   ├── medicine_database.py      # Medicine validation DB
+│   └── __pycache__/
+│
+├── config/
+│   ├── .env                      # Environment variables (secrets)
+│   ├── .env.example              # Example env template
+│   └── medicine_db.json          # Medicine reference database
+│
+├── data/
+│   ├── Thanglish.mp3             # Test audio file
+│   └── prescriptions.db          # SQLite database (created after first run)
+│
+├── tests/
+│   └── test_medical_system.py    # Unit and integration tests
+│
+├── docs/
+│   ├── ARCHITECTURE_SUMMARY.md   # System design details
+│   └── QUICK_REFERENCE.md        # API reference
+│
+├── frontend/
+│   └── index.html                # Web UI (optional)
+│
+├── run_system.py                 # Main entry point
+├── smart_labeling.py             # Smart text classification
+├── README.md                     # This file
+└── requirements.txt              # Python dependencies
 ```
 
-### Issue: "Medicine database module not available"
-Ensure `medicine_database.py` is in the same directory as `medical_system_v2.py`
+## 🔧 Core Components
 
-### Issue: Audio file not found
-Place your audio file (MP3/WAV) in the working directory and update `AUDIO_FILES` in the config.
+### Transcription (`src/transcription.py`)
+- **WhisperTranscriber**: OpenAI Whisper API or local Whisper model
+- **TranscriptCleaner**: Fixes ASR distortions (inflection→infection, etc.)
+- Supports multilingual audio (English, Tamil, Thanglish)
 
-## Module Descriptions
+### Extraction (`src/extraction.py`)
+- **GroqLLMExtractor**: Primary extraction using Groq API
+  - Temperature: 0 (deterministic)
+  - max_tokens: 2000 (handles complete responses)
+  - Automatic retry on parse failure
+  - Robust JSON parsing with 4-level fallback strategy
+  - Falls back to rules-based extraction if Groq fails
 
-### medical_system_v2.py
-Main orchestrator that:
-- Loads and transcribes audio
-- Extracts prescription data
-- Validates prescriptions
-- Stores to database
-- Generates JSON output
+### Validation (`src/validation.py`)
+- **ValidationLayer**: Validates extracted prescription data
+- Checks for required fields (at least 1 medicine)
+- Validates medicine names against database
+- Detects dangerous drug combinations
+- Returns detailed error/warning messages
 
-### medicine_database.py
-Centralized data repository containing:
-- Drug inventory (100+ medicines)
-- Drug interactions
-- Transcription corrections
-- Standard medical advice
-- Extraction keywords
+### Routing (`src/routing.py`)
+- **AudioAnalyzer**: Analyzes transcription quality
+- **RouteSelector**: Routes between Groq (primary) and rules-based (fallback)
+- Quality metrics: word density, medical keywords, confidence, length
 
-### doctor_review.py
-UI module for:
-- Doctor approval/modification
-- Quality verification
-- Correction workflow
+## 🧪 Testing
 
-### enhanced_validation.py
-Advanced validation:
-- Dosage verification
-- Drug interaction checking
-- Medical guideline compliance
+```bash
+# Run all tests
+python -m pytest tests/ -v
 
-### monitoring.py
-System observability:
-- Performance metrics
-- Error tracking
-- System health
+# Run specific test
+python -m pytest tests/test_medical_system.py -v
 
-## Contributing
+# Run with coverage
+python -m pytest tests/ --cov=src
+```
 
+## 🔒 Security & Best Practices
+
+- **API Keys**: Store in `config/.env`, never commit to git
+- **Database**: SQLite is local; use PostgreSQL in production
+- **Logging**: Check `medical_system_v2.log` for debugging
+- **Rate Limiting**: Implement request throttling for Groq API in production
+- **Input Validation**: All extracted data is validated before storage
+
+## 📊 Performance Notes
+
+### Transcription
+- **Local Whisper (medium)**: ~15-30s per minute of audio (GPU faster)
+- **OpenAI Whisper API**: ~5-10s per minute (cloud-based)
+
+### Extraction
+- **Groq**: ~2-3s (very fast, open-source models)
+- **Rules-based**: <1s (instant, but less accurate)
+
+### Total Processing Time
+- For 90-second medical consultation: ~30-40s (with local Whisper)
+
+## 🐛 Troubleshooting
+
+### Groq extraction returning 0 medicines
+- Check that transcript contains "medicine" keyword
+- Increase max_tokens in `_extract_groq()` (currently 2000)
+- Check Groq API status (openai/gpt-oss-120b model availability)
+
+### Transcription quality issues
+- Use longer audio files (>30 seconds for better detection)
+- Ensure clear audio without background noise
+- For Thanglish: model will auto-detect and normalize
+
+### "At least one medicine required" validation error
+- Medicine extraction needs explicit medicine mention in transcript
+- Try: "Prescribe erythromycin 500 mg 3 times a day for 5 days"
+- Check extraction logs for details
+
+## 📝 API Reference
+
+### MedicalSystem
+
+```python
+from src.medical_system_v2 import MedicalSystem
+
+system = MedicalSystem()
+result = system.process(audio_path="data/Thanglish.mp3")
+
+# Result structure:
+{
+    "success": True,
+    "patient_name": str,
+    "complaints": List[str],
+    "diagnosis": List[str],
+    "medicines": List[Dict],
+    "tests": List[str],
+    "advice": List[str],
+    "language": str,
+    "confidence": float,
+    "extraction_method": str,  # "groq" or "rules"
+    "processing_time_sec": float,
+    "route": str  # "groq_only" or "rules_fallback"
+}
+```
+
+## 🚀 Future Enhancements
+
+- [ ] Web API with FastAPI/Flask
+- [ ] Batch processing for multiple audio files
+- [ ] Custom medicine database per region
+- [ ] Multi-language support (Spanish, French, etc.)
+- [ ] Voice of the patient integration
+- [ ] Doctor review interface
+- [ ] Real-time transcription
+- [ ] Mobile app integration
+
+## 📜 License
+
+This project is licensed under the MIT License - see LICENSE file for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## Future Enhancements
+## 📧 Support
 
-- [ ] Multi-language full support
-- [ ] OCR for prescription images
-- [ ] Real-time audio streaming
-- [ ] ML-based extraction instead of rule-based
-- [ ] Web dashboard for doctor interface
-- [ ] Mobile app integration
-- [ ] Insurance claim generation
-- [ ] Automated follow-up scheduling
+For issues and questions:
+- Create a GitHub Issue: [issues](https://github.com/yourusername/voice_rx/issues)
+- Email: support@example.com
 
-## License
+## 🙏 Acknowledgments
 
-This project is proprietary software by Digitivity. Unauthorized copying or distribution is prohibited.
-
-## Contact
-
-- **GitHub:** https://github.com/digitivity-Gokul-Krishnan-Y-N
-- **Repository:** https://github.com/digitivity-Gokul-Krishnan-Y-N/voice_rx
-
-## Changelog
-
-### v2.1 (Current)
-- ✅ Fine-tuned extraction methods
-- ✅ Expanded medicine database (100+ drugs)
-- ✅ Separated medicine database module
-- ✅ Improved complaint/diagnosis prioritization
-- ✅ Enhanced medical term corrections
-
-### v2.0
-- ✅ Core prescription extraction
-- ✅ Whisper ASR integration
-- ✅ SQLite persistence
-- ✅ Validation layer
-
-### v1.0
-- Initial release
+- OpenAI Whisper for multilingual transcription
+- Groq for fast LLM inference
+- The medical consultation dataset creators
 
 ---
 
-**Last Updated:** 2026-02-18  
-**Status:** ✅ Production Ready
+**Last Updated**: February 2026  
+**Version**: 2.0-Production  
+**Status**: ✅ Production Ready

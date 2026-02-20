@@ -298,7 +298,7 @@ if __name__ == "__main__":
         if label != "classification_report" and items:
             print(f"\n{label.upper()}:")
             for item in items:
-                print(f"  • {item}")
+                print(f"  [bullet] {item}")
     
     print("\n\nLearning Report:")
     print("-" * 70)
