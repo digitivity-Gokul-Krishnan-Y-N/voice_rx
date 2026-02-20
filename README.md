@@ -68,7 +68,7 @@ A production-grade multilingual medical consultation transcription and prescript
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/voice_rx.git
+git clone https://github.com/digitivity-Gokul-Krishnan-Y-N/voice_rx.git
 cd voice_rx
 ```
 
@@ -313,7 +313,7 @@ This project is licensed under the MIT License - see LICENSE file for details.
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
-1. Fork the repository
+1. Fork the repository: [voice_rx](https://github.com/digitivity-Gokul-Krishnan-Y-N/voice_rx)
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
@@ -322,8 +322,8 @@ Contributions are welcome! Please:
 ## 📧 Support
 
 For issues and questions:
-- Create a GitHub Issue: [issues](https://github.com/yourusername/voice_rx/issues)
-- Email: support@example.com
+- Create a GitHub Issue: [issues](https://github.com/digitivity-Gokul-Krishnan-Y-N/voice_rx/issues)
+- Email: gokul.krishnan@digitivitysolutions.com
 
 ## 🙏 Acknowledgments
 
