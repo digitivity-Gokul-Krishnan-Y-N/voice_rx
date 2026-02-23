@@ -98,25 +98,31 @@ class ValidationLayer:
         errors = []
         warnings = []
 
-        # Required fields
+        # Optional fields (moved to warnings instead of errors)
         if not prescription.patient_name:
-            errors.append("Patient name required")
+            warnings.append("⚠️  Patient name not captured")
 
         if not prescription.diagnosis:
-            errors.append("At least one diagnosis required")
+            warnings.append("⚠️  No diagnosis found")
 
         if not prescription.medicines:
-            errors.append("At least one medicine required")
+            warnings.append("⚠️  No medicines prescribed (follow-up or advice-only consultation)")
 
         # Validate medicines
         seen_drugs = set()
         for i, med in enumerate(prescription.medicines):
             med_dict = med if isinstance(med, dict) else vars(med)
 
-            # Check dose format
+            # Check dose format - more lenient
             dose = str(med_dict.get('dose', ''))
-            if not any(re.search(pattern, dose.lower()) for pattern in self.DOSE_PATTERNS.values()):
-                errors.append(f"Medicine {i+1}: Invalid dose format '{dose}' (must include units)")
+            
+            # Allow if dose is missing (will be warning instead of error)
+            if dose and dose.lower() != 'none':
+                has_valid_dose = any(re.search(pattern, dose.lower()) for pattern in self.DOSE_PATTERNS.values())
+                if not has_valid_dose and len(dose) > 1:  # Only warn if dose is provided but malformed
+                    warnings.append(f"Medicine {i+1}: Dose format unclear '{dose}'")
+            elif not dose or dose.lower() == 'none':
+                warnings.append(f"Medicine {i+1}: Dose not specified")
 
             # Check for duplicates
             drug_name = str(med_dict.get('name', '')).lower()

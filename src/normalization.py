@@ -33,8 +33,18 @@ class TranscriptNormalizer:
         r'\bfrench\s+(?:dices|dice)\b': 'pharyngitis',
         r'\bfirennets\b': 'pharyngitis',
         r'\bpharangitis\b': 'pharyngitis',
+        r'\bparagenesis\b': 'pharyngitis',
+        r'\bparakinesis\b': 'pharyngitis',
+        r'\bpyrogynous\b': 'pharyngitis',
 
         # Drug name distortions
+        r'\blevosidazine\b': 'levocetirizine',
+        r'\blevocitirizine\b': 'levocetirizine',
+        r'\blevocitrazine\b': 'levocetirizine',
+        r'\blevofitrizin\b': 'levocetirizine',
+        r'\bbenzimidine\b': 'benzydamine',
+        r'\bbenzodiazine\b': 'benzydamine',
+        r'\btrepsils\b': 'strepsils',
         r'\berytho(?!mycin)\s+mice\s+in\b': 'erythromycin',
         r'\berytho\s+mice\s+in\b': 'erythromycin',
         r'\berythomycin\b': 'erythromycin',
@@ -86,11 +96,13 @@ class TranscriptNormalizer:
 
     # Dosage unit normalization
     DOSAGE_PATTERNS = {
-        r'(\d+)\s*mg\b': r'\1 mg',         # 500mg → 500 mg
-        r'(\d+)\s*ml\b': r'\1 ml',         # 10ml → 10 ml
-        r'(\d+)\s*mcg\b': r'\1 mcg',       # 100mcg → 100 mcg
-        r'(\d+)\s*gm\b': r'\1 gm',         # 1gm → 1 gm
-        r'(\d+)\s*gram\b': r'\1 gm',       # 1gram → 1 gm
+        r'(\d+(?:\.\d+)?)\s*mg\b': r'\1 mg',         # 500mg → 500 mg
+        r'(\d+(?:\.\d+)?)\s*ml\b': r'\1 ml',         # 10ml → 10 ml
+        r'(\d+(?:\.\d+)?)\s*mcg\b': r'\1 mcg',       # 100mcg → 100 mcg
+        r'(\d+(?:\.\d+)?)\s*gm\b': r'\1 gm',         # 1gm → 1 gm
+        r'(\d+(?:\.\d+)?)\s*gram\b': r'\1 gm',       # 1gram → 1 gm
+        r'(\d+)\s*iu\b': r'\1 iu',
+        r'(\d+)\s*unit\b': r'\1 unit',
         r'(\d+)\s*tablet\b': r'\1 tablet',
         r'(\d+)\s*capsule\b': r'\1 capsule',
         r'(\d+)\s*drop\b': r'\1 drop',

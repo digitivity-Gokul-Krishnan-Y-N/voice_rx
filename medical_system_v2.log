@@ -1,0 +1,326 @@
+2026-02-23 16:42:44,928 - INFO - 
+================================================================================
+2026-02-23 16:42:44,947 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 16:42:44,948 - INFO - ================================================================================
+2026-02-23 16:42:45,682 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 16:42:45,683 - INFO - Groq API key detected
+2026-02-23 16:42:45,692 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 16:42:47,145 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-23 16:42:47,146 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-23 16:42:47,146 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-23 16:42:47,164 - INFO - [OK] System ready with advanced extraction
+
+2026-02-23 16:42:47,173 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-23 16:43:21,296 - INFO - [DETECT] Whisper detected language: 'tamil'
+2026-02-23 16:43:21,296 - INFO - [DETECT] Probe text sample: பார்க்கலாம் பார்க்கலாம் பார்க்கலாம்
+2026-02-23 16:43:21,299 - INFO - [TA] Tamil detected (94% characters)
+2026-02-23 16:43:21,302 - INFO - [DETECT] Pure Tamil detected → 'ta' mode
+2026-02-23 16:43:21,302 - INFO - [WHISPER] Transcribing as 'ta' (whisper_lang='ta')
+2026-02-23 16:43:42,275 - INFO - [WHISPER] Tamil → English translation: 409 chars
+2026-02-23 16:43:42,276 - INFO - [WHISPER] Raw transcript (409 chars): Translate to English. Translate to Malayalam. If you have any skin problems, diarrhea, itching, or breathing problem, pl...
+2026-02-23 16:43:42,281 - INFO - [OK] Transcribed (409 chars, 68 words) [lang=ta]
+2026-02-23 16:43:42,283 - INFO - [TANGLISH] Thanglish detected (3 term matches)
+2026-02-23 16:43:42,289 - INFO - [NORMALIZE] No normalization needed
+2026-02-23 16:43:42,290 - INFO - Audio Analysis: Quality=84%, Language=ta(95%), Length=409 chars, Words=68
+2026-02-23 16:43:42,290 - INFO - Routing Decision: quality=84%, words=68, confidence=92%, language=ta
+2026-02-23 16:43:42,290 - INFO - [UNCERTAIN] ENSEMBLE: Borderline input → Using Groq + Rules (voting)
+2026-02-23 16:43:42,292 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-23 16:43:42,292 - INFO - Full cleaned transcript for extraction (409 chars): Translate to english. translate to malayalam. if you have any skin problems, diarrhea, itching, or breathing problem, please contact me. if fever does not go down in 2-3 days, if throat pain increases, if swallowing is difficult, or if you have breathing problem, please come for review. if you have symptoms, please come for follow-up after 5 days. if symptoms do not improve, please come earlier. thank you....
+2026-02-23 16:43:42,293 - INFO - Running advanced extraction on 409 chars...
+2026-02-23 16:43:42,293 - INFO - Transcript begins: Translate to english. translate to malayalam. if you have any skin problems, diarrhea, itching, or breathing problem, please contact me. if fever does...
+2026-02-23 16:43:42,293 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-23 16:43:44,355 - INFO - [OK] Groq extraction: 0 medicines, 0 diagnoses
+2026-02-23 16:43:44,357 - INFO - Pre-improvement: medicines=0, diagnosis=0
+2026-02-23 16:43:44,364 - INFO - Post-improvement: medicines=0, diagnosis=1
+2026-02-23 16:43:44,366 - INFO - Validation: [FAIL] FAILED (1 errors, 1 warnings)
+2026-02-23 16:52:50,483 - INFO - 
+================================================================================
+2026-02-23 16:52:50,485 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 16:52:50,485 - INFO - ================================================================================
+2026-02-23 16:52:50,850 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 16:52:50,851 - INFO - Groq API key detected
+2026-02-23 16:52:50,862 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 16:52:51,347 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-23 16:52:51,347 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-23 16:52:51,347 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-23 16:52:51,349 - INFO - [OK] System ready with advanced extraction
+
+2026-02-23 16:52:51,351 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-23 16:53:29,374 - INFO - [DETECT] Whisper detected language: 'en'
+2026-02-23 16:53:29,375 - INFO - [DETECT] Probe text sample: 
+2026-02-23 16:53:29,375 - INFO - [DETECT] English detected → 'en' mode
+2026-02-23 16:53:29,375 - INFO - [WHISPER] Transcribing as 'en' (whisper_lang='en')
+2026-02-23 16:53:47,649 - INFO - [WHISPER] Raw transcript (1220 chars): Hi Rohith, you have throat infection. So, it is mostly bacterial infection, i.e. acute pharyngitis, meaning there is inf...
+2026-02-23 16:53:47,653 - INFO - [OK] Transcribed (1220 chars, 217 words) [lang=en]
+2026-02-23 16:53:47,662 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 16:53:47,666 - INFO - [THANGLISH] No Thanglish terms found for normalization
+2026-02-23 16:53:47,673 - INFO - [NORMALIZE] Transcript cleaned (1220 → 1221 chars)
+2026-02-23 16:53:47,674 - INFO - Audio Analysis: Quality=79%, Language=tanglish(80%), Length=1221 chars, Words=217
+2026-02-23 16:53:47,674 - INFO - Routing Decision: quality=79%, words=217, confidence=92%, language=tanglish
+2026-02-23 16:53:47,674 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-23 16:53:47,674 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-23 16:53:47,675 - INFO - Full cleaned transcript for extraction (1221 chars): Hi rohith, you have throat infection. so, it is mostly bacterial infection, i.e. acute pharyngitis, meaning there is infection and inflammation in the throat. that is why i am prescribing an antibiotics. i will prescribe medicines that will reduce infection and reduce symptoms. it is erythromycin 500 mg, 3 times a day for 5 days, and 1 tablet for 8 hours. if you take food afterwards, your stomach upset will reduce. it is very important to complete a full course for 5 days. even if your throat pain or fever is reduced, you should not stop taking medicines. so, take a lot of warm fluids with medicines. so, gargle 3-4 times a day in warm salt water. it is best to avoid very cold drinks, spicy food, or even oily foods. give your voice a good rest and reduce speaking. there may be mild side effects like nausea, loose motions, and stomach upset. if you have severe diarrhea, vomiting, skin rashes, itching, swelling, or breathing problems, contact me immediately. if your fever does not reduce ...
+2026-02-23 16:53:47,675 - INFO - Running advanced extraction on 1221 chars...
+2026-02-23 16:53:47,675 - INFO - Transcript begins: Hi rohith, you have throat infection. so, it is mostly bacterial infection, i.e. acute pharyngitis, meaning there is infection and inflammation in the...
+2026-02-23 16:53:47,676 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-23 16:53:50,718 - INFO - [OK] Groq extraction: 1 medicines, 1 diagnoses
+2026-02-23 16:53:50,718 - INFO - Pre-improvement: medicines=1, diagnosis=1
+2026-02-23 16:53:50,718 - INFO - Post-improvement: medicines=1, diagnosis=1
+2026-02-23 16:53:50,719 - INFO - Validation: [OK] PASSED (0 errors, 0 warnings)
+2026-02-23 17:13:44,540 - INFO - 
+================================================================================
+2026-02-23 17:13:44,542 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 17:13:44,542 - INFO - ================================================================================
+2026-02-23 17:13:45,041 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 17:13:45,041 - INFO - Groq API key detected
+2026-02-23 17:13:45,057 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 17:13:45,876 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-23 17:13:45,878 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-23 17:13:45,878 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-23 17:13:45,891 - INFO - [OK] System ready with advanced extraction
+
+2026-02-23 17:13:45,903 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-23 17:14:23,297 - INFO - [DETECT] Whisper detected language: 'en'
+2026-02-23 17:14:23,297 - INFO - [DETECT] Probe text sample: 
+2026-02-23 17:14:23,297 - INFO - [DETECT] English detected → 'en' mode
+2026-02-23 17:14:23,298 - INFO - [WHISPER] Transcribing as 'en' (whisper_lang='en')
+2026-02-23 17:14:42,098 - INFO - [WHISPER] Raw transcript (1203 chars): Hi Rohith, Rohith you have throat infection. So this is mostly bacterial infection, that is acute pharyngitis. Meaning t...
+2026-02-23 17:14:42,101 - INFO - [OK] Transcribed (1203 chars, 209 words) [lang=en]
+2026-02-23 17:14:42,111 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 17:14:42,119 - INFO - [THANGLISH] No Thanglish terms found for normalization
+2026-02-23 17:14:42,129 - INFO - [NORMALIZE] Transcript cleaned (1203 → 1214 chars)
+2026-02-23 17:14:42,130 - INFO - Audio Analysis: Quality=80%, Language=tanglish(80%), Length=1214 chars, Words=213
+2026-02-23 17:14:42,130 - INFO - Routing Decision: quality=80%, words=213, confidence=92%, language=tanglish
+2026-02-23 17:14:42,130 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-23 17:14:42,132 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-23 17:14:42,132 - INFO - Full cleaned transcript for extraction (1214 chars): Hi rohith, rohith you have throat infection. so this is mostly bacterial infection, that is acute pharyngitis. meaning there is infection and inflammation in the throat. that is why i am prescribing an antibiotics. infection will be cleared and symptoms will be reduced. i will prescribe medicines. so it is erythromycin 500 mg once a day 3 times in 5 days. and take one tablet for 8 hours. if you take food afterwards, your stomach upset will reduce. so one very important thing is to complete 5 days full coursing. even if throat pain or fever reduces, medicines should not be stopped. so take a lot of warm fluids with medicines. so gargle 3-4 times once a day in warm salt water. avoid cold drinks, spicy foods, and oily foods. so give your wife a good rest and reduce talking. so mild side effects can occur like nausea, loose motion, stomach upset. but if you have severe diarrhea, vomiting, skin rashes, itching, swelling, or breathing problem, contact me immediately. so if fever does not red...
+2026-02-23 17:14:42,132 - INFO - Running advanced extraction on 1214 chars...
+2026-02-23 17:14:42,132 - INFO - Transcript begins: Hi rohith, rohith you have throat infection. so this is mostly bacterial infection, that is acute pharyngitis. meaning there is infection and inflamma...
+2026-02-23 17:14:42,132 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-23 17:14:44,898 - INFO - [OK] Groq extraction: 1 medicines, 1 diagnoses
+2026-02-23 17:14:44,898 - INFO - Pre-improvement: medicines=1, diagnosis=1
+2026-02-23 17:14:44,899 - INFO - Post-improvement: medicines=1, diagnosis=1
+2026-02-23 17:14:44,899 - INFO - Validation: [OK] PASSED (0 errors, 0 warnings)
+2026-02-23 17:17:26,773 - INFO - 
+================================================================================
+2026-02-23 17:17:26,773 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 17:17:26,774 - INFO - ================================================================================
+2026-02-23 17:17:27,125 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 17:17:27,125 - INFO - Groq API key detected
+2026-02-23 17:17:27,133 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 17:17:28,726 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-23 17:17:28,727 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-23 17:17:28,727 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-23 17:17:28,729 - INFO - [OK] System ready with advanced extraction
+
+2026-02-23 17:17:28,730 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-23 17:17:48,485 - INFO - [DETECT] Whisper detected language: 'english'
+2026-02-23 17:17:48,487 - INFO - [DETECT] Probe text sample: Certainly. Hi, Kevin. You have a throat infection. This is most likely a viral infection called vira
+2026-02-23 17:17:48,491 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 17:17:48,491 - INFO - [DETECT] English audio with 4 Thanglish markers → 'tanglish' mode
+2026-02-23 17:17:48,491 - INFO - [WHISPER] Transcribing as 'tanglish' (whisper_lang='en')
+2026-02-23 17:18:14,706 - INFO - [WHISPER] Raw transcript (623 chars): Transcribe exactly as spoken. Transcribe exactly as spoken. Drink plenty of warm fluids. Gargle with warm salt water thr...
+2026-02-23 17:18:14,710 - INFO - [OK] Transcribed (620 chars, 97 words) [lang=tanglish]
+2026-02-23 17:18:14,716 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 17:18:14,720 - INFO - [THANGLISH] No Thanglish terms found for normalization
+2026-02-23 17:18:14,727 - INFO - [NORMALIZE] Transcript cleaned (620 → 625 chars)
+2026-02-23 17:18:14,727 - INFO - Audio Analysis: Quality=83%, Language=tanglish(85%), Length=625 chars, Words=99
+2026-02-23 17:18:14,729 - INFO - Routing Decision: quality=83%, words=99, confidence=92%, language=tanglish
+2026-02-23 17:18:14,729 - INFO - [UNCERTAIN] ENSEMBLE: Borderline input → Using Groq + Rules (voting)
+2026-02-23 17:18:14,729 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-23 17:18:14,730 - INFO - Full cleaned transcript for extraction (625 chars): Transcribe exactly as spoken. transcribe exactly as spoken. drink plenty of warm fluids. gargle with warm salt water three to 4 times once a day. hold drinks, spicy foods, and oily foods. give your voice proper rest and try to limit talking. you may have mild side effects like slight stomach upset, drowsiness, especially from the night tablet, or mild throat irritation from the spray. if you develop severe vomiting, skin rash, swelling, or breathing difficulty, contact me immediately. swallowing becomes difficult or you have breathing problems. come for review. otherwise, come for follow-up after five days. take care....
+2026-02-23 17:18:14,730 - INFO - Running advanced extraction on 625 chars...
+2026-02-23 17:18:14,730 - INFO - Transcript begins: Transcribe exactly as spoken. transcribe exactly as spoken. drink plenty of warm fluids. gargle with warm salt water three to 4 times once a day. hold...
+2026-02-23 17:18:14,731 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-23 17:18:17,695 - INFO - [OK] Groq extraction: 0 medicines, 0 diagnoses
+2026-02-23 17:18:17,696 - INFO - Pre-improvement: medicines=0, diagnosis=0
+2026-02-23 17:18:17,707 - INFO - Post-improvement: medicines=1, diagnosis=0
+2026-02-23 17:18:17,708 - INFO - Validation: [OK] PASSED (0 errors, 3 warnings)
+2026-02-23 17:27:58,995 - INFO - 
+================================================================================
+2026-02-23 17:27:58,995 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 17:27:58,995 - INFO - ================================================================================
+2026-02-23 17:27:59,450 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 17:27:59,451 - INFO - Groq API key detected
+2026-02-23 17:27:59,451 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 17:28:00,070 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-23 17:28:00,070 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-23 17:28:00,070 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-23 17:28:00,072 - INFO - [OK] System ready with advanced extraction
+
+2026-02-23 17:28:00,073 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-23 17:28:42,846 - INFO - [DETECT] Whisper detected language: 'tamil'
+2026-02-23 17:28:42,846 - INFO - [DETECT] Probe text sample: அருந்தி சோட்டு மற்றியம். மருத்துவள் கவலை சிறிது நேர்காயம் நண்மதன்கள், உணர்வில் கண்டபி நடிப்பை என் பண
+2026-02-23 17:28:42,851 - INFO - [TA] Tamil detected (85% characters)
+2026-02-23 17:28:42,852 - INFO - [DETECT] Pure Tamil detected → 'ta' mode
+2026-02-23 17:28:42,852 - INFO - [WHISPER] Transcribing as 'ta' (whisper_lang='ta')
+2026-02-23 17:28:54,981 - INFO - [WHISPER] Tamil → English translation: 1242 chars
+2026-02-23 17:28:54,984 - INFO - [WHISPER] Raw transcript (1242 chars): Hi Rohit, you have throat infection. So this is mostly bacterial infection, i.e. acute pharyngitis. Meaning there is inf...
+2026-02-23 17:28:54,989 - INFO - [OK] Transcribed (1243 chars, 223 words) [lang=ta]
+2026-02-23 17:28:54,993 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 17:28:55,003 - INFO - [NORMALIZE] Transcript cleaned (1243 → 1254 chars)
+2026-02-23 17:28:55,005 - INFO - Audio Analysis: Quality=82%, Language=ta(95%), Length=1254 chars, Words=227
+2026-02-23 17:28:55,009 - INFO - Routing Decision: quality=82%, words=227, confidence=92%, language=ta
+2026-02-23 17:28:55,009 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-23 17:28:55,009 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-23 17:28:55,009 - INFO - Full cleaned transcript for extraction (1254 chars): Hi rohit, you have throat infection. so this is mostly bacterial infection, i.e. acute pharyngitis. meaning there is infection and inflammation in the throat. that's why i am prescribing an antibiotics. infection will be cleared and symptoms will be reduced. i will prescribe the medicines. it is erythromycin 500 mg once a day 3 times and 5 days. and take 1 tablet for 8 hours. if you take food, your stomach upset will be reduced. so it is very important that you complete the course for 5 days. even if the throat pain or fever is reduced, medicines should not be stopped. so take a lot of warm fluids with the medicines. so gargle 3-4 times once a day in warm salt water. it is best to avoid very cold drinks, spicy food or even oily foods. so give a good rest to the voice and reduce the talking a little. so mild side effects can occur like nausea, loose motion, stomach upset. but if you have severe diarrhea, vomiting, skin rashes, itching, swelling or breathing problem, contact me immediate...
+2026-02-23 17:28:55,010 - INFO - Running advanced extraction on 1254 chars...
+2026-02-23 17:28:55,010 - INFO - Transcript begins: Hi rohit, you have throat infection. so this is mostly bacterial infection, i.e. acute pharyngitis. meaning there is infection and inflammation in the...
+2026-02-23 17:28:55,010 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-23 17:28:57,264 - INFO - [OK] Groq extraction: 1 medicines, 1 diagnoses
+2026-02-23 17:28:57,264 - INFO - Pre-improvement: medicines=1, diagnosis=1
+2026-02-23 17:28:57,264 - INFO - Post-improvement: medicines=1, diagnosis=1
+2026-02-23 17:28:57,265 - INFO - Validation: [OK] PASSED (0 errors, 0 warnings)
+2026-02-23 17:30:40,045 - INFO - 
+================================================================================
+2026-02-23 17:30:40,045 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 17:30:40,045 - INFO - ================================================================================
+2026-02-23 17:30:40,303 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 17:30:40,303 - INFO - Groq API key detected
+2026-02-23 17:30:40,313 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 17:32:28,685 - INFO - 
+================================================================================
+2026-02-23 17:32:28,685 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 17:32:28,685 - INFO - ================================================================================
+2026-02-23 17:32:28,915 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 17:32:28,915 - INFO - Groq API key detected
+2026-02-23 17:32:28,915 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 17:32:32,151 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-23 17:32:32,151 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-23 17:32:32,151 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-23 17:32:32,154 - INFO - [OK] System ready with advanced extraction
+
+2026-02-23 17:32:32,154 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-23 17:33:17,205 - INFO - [DETECT] Whisper detected language: 'english'
+2026-02-23 17:33:17,205 - INFO - [DETECT] Probe text sample: Hi Kevin, you have a throat infection. This is most likely a viral infection called viral pharyngiti
+2026-02-23 17:33:17,209 - INFO - [EN] English detected (default)
+2026-02-23 17:33:17,210 - INFO - [DETECT] English detected → 'en' mode
+2026-02-23 17:33:17,210 - INFO - [WHISPER] Transcribing as 'en' (whisper_lang='en')
+2026-02-23 17:33:44,031 - INFO - [WHISPER] Raw transcript (1409 chars): Hi Kevin, you have a throat infection. This is most likely a viral infection called viral pharyngitis, which means there...
+2026-02-23 17:33:44,036 - INFO - [OK] Transcribed (1411 chars, 236 words) [lang=en]
+2026-02-23 17:33:44,042 - INFO - [TANGLISH] Thanglish detected (5 term matches)
+2026-02-23 17:33:44,052 - INFO - [THANGLISH] No Thanglish terms found for normalization
+2026-02-23 17:33:44,065 - INFO - [NORMALIZE] Transcript cleaned (1411 → 1433 chars)
+2026-02-23 17:33:44,065 - INFO - Audio Analysis: Quality=82%, Language=tanglish(85%), Length=1433 chars, Words=244
+2026-02-23 17:33:44,065 - INFO - Routing Decision: quality=82%, words=244, confidence=92%, language=tanglish
+2026-02-23 17:33:44,065 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-23 17:33:44,065 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-23 17:33:44,065 - INFO - Full cleaned transcript for extraction (1433 chars): Hi kevin, you have a throat infection. this is most likely a viral infection called viral pharyngitis, which means there is irritation and inflammation in your throat. it is usually caused by a virus and often improves on its own, but medicines can help to reduce symptoms and help you feel comfortable. take paracetamol 500 mg every 6-8 hours if you have fever or throat pain. do not exceed the recommended once a day dose. take levocitirazine 5 mg once a day at night to reduce throat irritation and allergy symptoms. use throat lozenges, strepsils, or similar 3-4 times a day to help by slowly dissolving them in your mouth to soothe the throat. take a vitamin c plus zinc supplement once a day once a day to support immunity. drink plenty of warm fluids. gargle with warm salt water 3-4 times a day. avoid cold drinks. avoid drinking cold drinks. waste proper rest and try to limit talking. you may have mild side effects such as light stomach upset, drowsiness, especially from the night tablet,...
+2026-02-23 17:33:44,065 - INFO - Running advanced extraction on 1433 chars...
+2026-02-23 17:33:44,065 - INFO - Transcript begins: Hi kevin, you have a throat infection. this is most likely a viral infection called viral pharyngitis, which means there is irritation and inflammatio...
+2026-02-23 17:33:44,065 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-23 17:33:48,116 - INFO - [OK] Groq extraction: 4 medicines, 1 diagnoses
+2026-02-23 17:33:48,117 - INFO - Pre-improvement: medicines=4, diagnosis=1
+2026-02-23 17:33:48,118 - INFO - Post-improvement: medicines=4, diagnosis=1
+2026-02-23 17:33:48,118 - INFO - Validation: [OK] PASSED (0 errors, 2 warnings)
+2026-02-23 17:36:43,084 - INFO - 
+================================================================================
+2026-02-23 17:36:43,084 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 17:36:43,084 - INFO - ================================================================================
+2026-02-23 17:40:00,388 - INFO - 
+================================================================================
+2026-02-23 17:40:00,388 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 17:40:00,388 - INFO - ================================================================================
+2026-02-23 17:40:00,738 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 17:40:00,738 - INFO - Groq API key detected
+2026-02-23 17:40:00,752 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 17:40:02,002 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-23 17:40:02,002 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-23 17:40:02,002 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-23 17:40:02,005 - INFO - [OK] System ready with advanced extraction
+
+2026-02-23 17:40:02,006 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-23 17:40:30,077 - INFO - [DETECT] Whisper detected language: 'english'
+2026-02-23 17:40:30,078 - INFO - [DETECT] Probe text sample: Hi Kevin, you have a throat infection. This is most likely a viral infection called viral pharyngiti
+2026-02-23 17:40:30,084 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 17:40:30,084 - INFO - [DETECT] English audio — only 4 Thanglish markers (threshold=6), treating as English
+2026-02-23 17:40:30,084 - INFO - [DETECT] English detected → 'en' mode
+2026-02-23 17:40:30,085 - INFO - [WHISPER] Transcribing as 'en' (whisper_lang='en')
+2026-02-23 17:40:41,963 - INFO - [WHISPER] Raw transcript (1288 chars): Hi Kevin, you have a throat infection. This is most likely a viral infection called viral pharyngitis, which means it is...
+2026-02-23 17:40:41,967 - INFO - [OK] Transcribed (1290 chars, 213 words) [lang=en]
+2026-02-23 17:40:41,973 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 17:40:41,976 - INFO - [THANGLISH] No Thanglish terms found for normalization
+2026-02-23 17:40:41,997 - INFO - [NORMALIZE] Transcript cleaned (1290 → 1320 chars)
+2026-02-23 17:40:42,015 - INFO - Audio Analysis: Quality=82%, Language=tanglish(80%), Length=1320 chars, Words=225
+2026-02-23 17:40:42,015 - INFO - Routing Decision: quality=82%, words=225, confidence=92%, language=tanglish
+2026-02-23 17:40:42,016 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-23 17:40:42,018 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-23 17:40:42,018 - INFO - Full cleaned transcript for extraction (1320 chars): Hi kevin, you have a throat infection. this is most likely a viral infection called viral pharyngitis, which means it is usually caused by a virus and often improves on its own, but medicines are given to reduce symptoms and help you feel better. take paracetamol 500 mg every 6-8 hours if you have fever or throat pain. do not exceed the recommended once a day dose. take levocitirazine 5 mg to reduce throat irritation and allergy symptoms. use benzydamine throat spray 3-4 times once a day to help reduce pain and inflammation. use throat lozenges, strep cells, or similar 3-4 times once a day by slowly dissolving them in your mouth to soothe the throat. take a vitamin c plus zinc supplement once a day once a day to support immunity. drink plenty of warm fluids. drink salt water 3-4 times once a day. avoid very cold drinks, seafoods, and oily foods. give your voice a proper rest and try to limit talking. you may have slight stomach upset, drowsiness, especially from the night tablet, or ir...
+2026-02-23 17:40:42,019 - INFO - Running advanced extraction on 1320 chars...
+2026-02-23 17:40:42,019 - INFO - Transcript begins: Hi kevin, you have a throat infection. this is most likely a viral infection called viral pharyngitis, which means it is usually caused by a virus and...
+2026-02-23 17:40:42,020 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-23 17:40:46,882 - INFO - [OK] Groq extraction: 5 medicines, 1 diagnoses
+2026-02-23 17:40:46,883 - INFO - Pre-improvement: medicines=5, diagnosis=1
+2026-02-23 17:40:46,884 - INFO - Post-improvement: medicines=5, diagnosis=1
+2026-02-23 17:40:46,885 - INFO - Validation: [OK] PASSED (0 errors, 3 warnings)
+2026-02-23 17:42:21,866 - INFO - 
+================================================================================
+2026-02-23 17:42:21,866 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 17:42:21,867 - INFO - ================================================================================
+2026-02-23 17:42:22,168 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 17:42:22,169 - INFO - Groq API key detected
+2026-02-23 17:42:22,180 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 17:42:22,703 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-23 17:42:22,704 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-23 17:42:22,704 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-23 17:42:22,707 - INFO - [OK] System ready with advanced extraction
+
+2026-02-23 17:42:22,708 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-23 17:42:55,558 - INFO - [DETECT] Whisper detected language: 'tamil'
+2026-02-23 17:42:55,560 - INFO - [DETECT] Probe text sample: பரிதோது தனிக்காக அப்படி உறுதிய பரிசு 2020-2020cis முக்கியம் மதாதிப்பு செய்தோம் அவசிதிய google ஆண்டுக
+2026-02-23 17:42:55,564 - INFO - [TA] Tamil detected (76% characters)
+2026-02-23 17:42:55,565 - INFO - [DETECT] Pure Tamil detected → 'ta' mode
+2026-02-23 17:42:55,565 - INFO - [WHISPER] Transcribing as 'ta' (whisper_lang='ta')
+2026-02-23 17:43:03,311 - INFO - [WHISPER] Tamil → English translation: 1238 chars
+2026-02-23 17:43:03,312 - INFO - [WHISPER] Raw transcript (1238 chars): Hi Rohit, you have throat infection. So it is mostly bacterial infection, that is acute pharyngitis, meaning there is in...
+2026-02-23 17:43:03,314 - INFO - [OK] Transcribed (1238 chars, 222 words) [lang=ta]
+2026-02-23 17:43:03,318 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 17:43:03,333 - INFO - [NORMALIZE] Transcript cleaned (1238 → 1249 chars)
+2026-02-23 17:43:03,345 - INFO - Audio Analysis: Quality=83%, Language=ta(95%), Length=1249 chars, Words=226
+2026-02-23 17:43:03,346 - INFO - Routing Decision: quality=83%, words=226, confidence=92%, language=ta
+2026-02-23 17:43:03,346 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-23 17:43:03,346 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-23 17:43:03,348 - INFO - Full cleaned transcript for extraction (1249 chars): Hi rohit, you have throat infection. so it is mostly bacterial infection, that is acute pharyngitis, meaning there is infection and inflammation in the throat. that is why i am prescribing an antibiotics. the infection will be cleared and the symptoms will be reduced. i will prescribe the medicines. so it is erythromycin 500 mg once a day 3 times in 5 days and take one tablet for 8 hours. if you take food later, your stomach upset will reduce. so it is very important that you complete the course for 5 days. even if your throat pain or fever reduces, you should not stop the medicines. so take a lot of warm fluids with the medicines. so gargle 3-4 times once a day in warm salt water. avoid very cold drinks, spicy food or even oily foods. so give a good rest to the voice and reduce the amount of talking. so mild side effects can occur like nausea, loose motions, stomach upset. but if you have severe diarrhea, vomiting, skin rashes, itching, swelling or breathing problem, contact me immedi...
+2026-02-23 17:43:03,348 - INFO - Running advanced extraction on 1249 chars...
+2026-02-23 17:43:03,348 - INFO - Transcript begins: Hi rohit, you have throat infection. so it is mostly bacterial infection, that is acute pharyngitis, meaning there is infection and inflammation in th...
+2026-02-23 17:43:03,349 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-23 17:43:06,831 - INFO - [OK] Groq extraction: 1 medicines, 1 diagnoses
+2026-02-23 17:43:06,831 - INFO - Pre-improvement: medicines=1, diagnosis=1
+2026-02-23 17:43:06,832 - INFO - Post-improvement: medicines=1, diagnosis=1
+2026-02-23 17:43:06,832 - INFO - Validation: [OK] PASSED (0 errors, 0 warnings)
+2026-02-23 17:44:40,849 - INFO - 
+================================================================================
+2026-02-23 17:44:40,850 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-23 17:44:40,850 - INFO - ================================================================================
+2026-02-23 17:44:41,121 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-23 17:44:41,122 - INFO - Groq API key detected
+2026-02-23 17:44:41,134 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-23 17:44:41,669 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-23 17:44:41,670 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-23 17:44:41,670 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-23 17:44:41,673 - INFO - [OK] System ready with advanced extraction
+
+2026-02-23 17:44:41,674 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-23 17:45:00,603 - INFO - [DETECT] Whisper detected language: 'english'
+2026-02-23 17:45:00,603 - INFO - [DETECT] Probe text sample: Okay, do you have a throat infection that is slightly bacterial in nature acute pharyngitis, which i
+2026-02-23 17:45:00,611 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 17:45:00,611 - INFO - [DETECT] English audio — only 4 Thanglish markers (threshold=6), treating as English
+2026-02-23 17:45:00,611 - INFO - [DETECT] English detected → 'en' mode
+2026-02-23 17:45:00,612 - INFO - [WHISPER] Transcribing as 'en' (whisper_lang='en')
+2026-02-23 17:45:12,636 - INFO - [WHISPER] Raw transcript (1115 chars): Do you have a throat infection that is likely bacterial in nature? Acute pharyngitis, which is an infection and inflamma...
+2026-02-23 17:45:12,639 - INFO - [OK] Transcribed (1115 chars, 193 words) [lang=en]
+2026-02-23 17:45:12,644 - INFO - [TANGLISH] Thanglish detected (4 term matches)
+2026-02-23 17:45:12,646 - INFO - [THANGLISH] No Thanglish terms found for normalization
+2026-02-23 17:45:12,661 - INFO - [NORMALIZE] Transcript cleaned (1115 → 1117 chars)
+2026-02-23 17:45:12,680 - INFO - Audio Analysis: Quality=82%, Language=tanglish(80%), Length=1117 chars, Words=193
+2026-02-23 17:45:12,682 - INFO - Routing Decision: quality=82%, words=193, confidence=92%, language=tanglish
+2026-02-23 17:45:12,682 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-23 17:45:12,682 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-23 17:45:12,682 - INFO - Full cleaned transcript for extraction (1117 chars): Do you have a throat infection that is likely bacterial in nature? acute pharyngitis, which is an infection and inflammation of the throat. i am prescribing an antibiotics to help clear the infection and reduce your symptoms. take erythromycin 500 mg 3 times a day for 5 days. take one tablet every 8 hours. preferably after food to avoid stomach discomfort. it is very important that you complete the full 5 days course even if your throat pain or fever improves. along with the medication, drink plenty of warm fluids. do warm salt water gargles 3-4 times a day. avoid very cold drinks, spicy food, and oily food for a few days. rest your voice as much as possible. you may have mild side effects. like nausea, loose stools, or stomach upset. if you develop severe diarrhea, vomiting, skin rash, or any allergic symptoms such as itching, swelling, or difficulty breathing, please contact me immediately. if your fever persists beyond 2-3 days, if your throat pain worsens, or if you have difficulty...
+2026-02-23 17:45:12,683 - INFO - Running advanced extraction on 1117 chars...
+2026-02-23 17:45:12,683 - INFO - Transcript begins: Do you have a throat infection that is likely bacterial in nature? acute pharyngitis, which is an infection and inflammation of the throat. i am presc...
+2026-02-23 17:45:12,683 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-23 17:45:15,037 - INFO - [OK] Groq extraction: 1 medicines, 1 diagnoses
+2026-02-23 17:45:15,038 - INFO - Pre-improvement: medicines=1, diagnosis=1
+2026-02-23 17:45:15,038 - INFO - Post-improvement: medicines=1, diagnosis=1
+2026-02-23 17:45:15,039 - INFO - Validation: [OK] PASSED (0 errors, 1 warnings)

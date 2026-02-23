@@ -80,8 +80,26 @@ You are a medical data extraction specialist. Extract prescription data from the
 
 LANGUAGE NOTICE:
 - The transcript may be in English, Tamil (Unicode), or Thanglish (Tamil words in English letters).
-- Thanglish examples: 'noi' (disease), 'marunthu' (medicine), 'vali' (pain), 'kaichal' (fever)
-- If Tamil/Thanglish text appears, interpret it according to medical context.
+- Thanglish examples:
+  * 'noi' = disease, 'marunthu' = medicine, 'vali' = pain, 'kaichal' = fever
+  * 'irukku' = there is/has, 'irundha' = if there is
+  * 'daily X times' or 'daily X murai' = X times a day
+  * 'food apram' or 'saptu' or 'sapda' = after food
+  * 'night time' or 'iravu' or 'raatriyil' = at night
+  * 'nasal block' or 'mookkadaippu' = nasal congestion
+  * 'sinusitis' or 'sinus vali' = sinusitis
+  * 'CBC' = Complete Blood Count (lab test)
+  * 'CRP' = C-Reactive Protein test (inflammation)
+  * 'X-ray PNS' = Paranasal Sinus X-ray
+  * 'nasal swab' = nasal swab test
+  * 'kammi panna' or 'kammi aagum' = reduce/decrease
+  * 'confirm panna' = to confirm/diagnose
+  * 'suggest panren' = I suggest
+  * 'follow pannu' = follow/take
+  * 'eduthukko' = take it
+  * 'use pannu' = use it
+  * 'avoid pannu' = avoid it
+- If Tamil/Thanglish text appears, interpret it according to medical context and extract only English medical data.
 
 IMPORTANT: The transcript is from automatic speech recognition (ASR) and may contain residual errors even after cleaning.
 Common ASR artifacts to recognize:
@@ -90,8 +108,11 @@ Common ASR artifacts to recognize:
 - 'paragenesis' should be 'pharyngitis'
 - 'back inflection' should be 'bacterial infection'
 - 'kayachel' / 'kaychel' should be 'fever'
-- Drug names may be phonetically distorted (e.g. 'erytho mice in' = 'erythromycin')
-- Numbers and measurements may be slurred (e.g. 'five oh zero' = 'five hundred' or '500')
+- 'levosidazine' or 'levocitirizine' should be 'levocetirizine'
+- 'benzimidine' or 'benzodiazine' should be 'benzydamine' (throat spray)
+- 'trepsils' should be 'strepsils'
+- 'vitamin c' or 'zinc' should be captured as supplements
+- 'one tablet at night' means 'once a day' frequency
 
 Use MEDICAL KNOWLEDGE and clinical reasoning to interpret the transcript correctly.
 If the transcription is very poor and you cannot confidently extract data, return null values rather than inventing data.
@@ -101,18 +122,32 @@ Return JSON with these exact keys (NO OTHER TEXT, NO EXPLANATIONS):
   "patient_name": "string or null",
   "age": null,
   "complaints": ["fever", "throat pain"],
-  "diagnosis": ["bacterial infection"],
+  "diagnosis": ["viral pharyngitis"],
   "medicines": [
     {{
-      "name": "erythromycin",
+      "name": "paracetamol",
       "dose": "500 mg",
       "frequency": "3 times a day",
       "duration": "5 days",
-      "instruction": "after food"
+      "instruction": "as needed"
+    }},
+    {{
+      "name": "levocetirizine",
+      "dose": "5 mg",
+      "frequency": "once a day",
+      "duration": "5 days",
+      "instruction": "at night"
+    }},
+    {{
+      "name": "benzydamine throat spray",
+      "dose": "3-4 sprays",
+      "frequency": "3-4 times a day",
+      "duration": "5 days",
+      "instruction": "topical"
     }}
   ],
   "tests": [],
-  "advice": ["complete the course"]
+  "advice": ["avoid cold drinks", "gargle with salt water"]
 }}
 
 Medical Consultation:
@@ -120,17 +155,23 @@ Medical Consultation:
 
 EXTRACTION RULES:
 - Return ONLY valid JSON, nothing else
+- Capture ALL medicines mentioned: including tablets, sprays, lozenges, and supplements.
 - Patient name: Extract ONCE, no duplicates (e.g. "Hi Rohit, Rohit..." → "Rohit")
 - Complaints: Specific symptoms mentioned (fever, throat pain, cough, etc.)
-- Diagnosis: Medical conditions (throat infection, bacterial infection, etc.)
-- Medicines: Only prescribed drugs with complete information
-  * name: medicine name (e.g., "erythromycin")
-  * dose: must include units (mg, ml, mcg, tablet, capsule) e.g., "500 mg"
-  * frequency: times per day (e.g., "3 times a day")
-  * duration: days/weeks (e.g., "5 days")
-  * instruction: timing relative to food ("after food", "before food", "with meal")
-- Tests: Lab tests mentioned
-- Advice: Patient guidance strings
+- Diagnosis: Medical conditions (viral pharyngitis, bacterial infection, etc.)
+- Medicines: Only prescribed items with best available information
+  * name: medicine name (e.g., "levocetirizine")
+  * dose: include units (mg, ml, mcg, gm, iu, tablet, capsule, sprays, lozenge)
+  * frequency: times per day (e.g., "once a day", "2 times a day", "every 6-8 hours")
+  * duration: days/weeks (e.g., "5 days") - capture if mentioned per medicine
+  * instruction: timing/method ("after food", "at night", "topical", "as needed")
+- Tests: Capture ALL lab tests/investigations mentioned. Common ones:
+  * "CBC" = Complete Blood Count
+  * "CRP" = C-Reactive Protein
+  * "X-ray PNS" or "PNS x-ray" = Paranasal Sinus X-ray
+  * "nasal swab" = nasal swab culture
+  * Include any blood test, imaging, or culture mentioned
+- Advice: Patient guidance strings in English (translate Thanglish to English if needed)
 
 Output ONLY the JSON object. No markdown. No code blocks. No explanations.
 """
@@ -462,19 +503,19 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
         # Multiple patterns to catch variations
         patterns = [
             # Pattern 1: "take erythromycin 500 mg 3 times a day for 5 days"
-            r'(?:take|prescribe|give)\s+([a-z\s]+?)\s+(\d+)\s*(mg|ml|mcg|tablet|capsule)s?\s+(\d+)\s*times?\s+a\s+day\s+for\s+(\d+)\s*days?',
+            r'(?:take|prescribe|give)\s+([a-z\s]+?)\s+(\d+)\s*(mg|ml|mcg|gm|g|gram|iu|tablet|capsule|drop|unit)s?\s+(\d+)\s*times?\s+a\s+day\s+for\s+(\d+)\s*days?',
             
-            # Pattern 2: "medicine, erythromycin, 500 mg daily 3 times for 5 days" OR "medicine, erythromycin, 500 mg once a day 3 times for 5 days"
-            r'medicine[,.]?\s+([a-z]+)\s*[,.]?\s*(\d+)\s*(mg|ml|mcg|tablet|capsule)s?\s+(?:once\s+)?a\s+day\s+(\d+)\s*times?\s+(?:for\s+)?(\d+)\s*days?',
+            # Pattern 2: "medicine, erythromycin, 500 mg daily 3 times for 5 days"
+            r'medicine[,.]?\s+([a-z]+)\s*[,.]?\s*(\d+)\s*(mg|ml|mcg|gm|g|gram|iu|tablet|capsule|drop|unit)s?\s+(?:once\s+)?a\s+day\s+(\d+)\s*times?\s+(?:for\s+)?(\d+)\s*days?',
             
-            # Pattern 3: "medicine, erythromycin, 500 mg daily 3 times for 5 days" (original daily version)
-            r'medicine[,.]?\s+([a-z]+)\s*[,.]?\s*(\d+)\s*(mg|ml|mcg|tablet|capsule)s?\s+daily\s+(\d+)\s*times?\s+for\s+(\d+)\s*days?',
+            # Pattern 3: "medicine, erythromycin, 500 mg daily 3 times for 5 days"
+            r'medicine[,.]?\s+([a-z]+)\s*[,.]?\s*(\d+)\s*(mg|ml|mcg|gm|g|gram|iu|tablet|capsule|drop|unit)s?\s+daily\s+(\d+)\s*times?\s+for\s+(\d+)\s*days?',
             
             # Pattern 4: "erythromycin 500 mg, 3 times a day for 5 days"
-            r'([a-z]+)\s+(\d+)\s*(mg|ml|mcg|tablet|capsule)s?\s*[,.]?\s+(\d+)\s*times?\s+a\s+day\s+for\s+(\d+)\s*days?',
+            r'([a-z]+)\s+(\d+)\s*(mg|ml|mcg|gm|g|gram|iu|tablet|capsule|drop|unit)s?\s*[,.]?\s+(\d+)\s*times?\s+a\s+day\s+for\s+(\d+)\s*days?',
             
             # Pattern 5: "medicine erythromycin 500mg 3 times daily 5 days"
-            r'medicine\s+([a-z]+)\s+(\d+)(mg|ml|mcg|tablet|capsule)\s+(\d+)\s*times?\s+(?:a\s+)?day\s+(?:for\s+)?(\d+)\s*days?',
+            r'medicine\s+([a-z]+)\s+(\d+)(mg|ml|mcg|gm|g|gram|iu|tablet|capsule|drop|unit)\s+(\d+)\s*times?\s+(?:a\s+)?day\s+(?:for\s+)?(\d+)\s*days?',
         ]
 
         for pattern in patterns:

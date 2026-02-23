@@ -1,0 +1,42 @@
+{
+  "success": true,
+  "patient_name": null,
+  "complaints": [
+    "throat pain",
+    "fever"
+  ],
+  "diagnosis": [
+    "acute bacterial pharyngitis"
+  ],
+  "medicines": [
+    {
+      "name": "erythromycin",
+      "dose": "500 mg",
+      "frequency": "3 times a day",
+      "duration": "5 days",
+      "instruction": "after food",
+      "route": "oral",
+      "side_effects": []
+    }
+  ],
+  "tests": [],
+  "advice": [
+    "Take medicine after food to avoid stomach discomfort",
+    "Complete the full 5 day course if prescribed antibiotics",
+    "Drink plenty of warm fluids",
+    "Do warm salt water gargles 3-4 times a day",
+    "Avoid very cold drinks",
+    "Avoid spicy food",
+    "Avoid oily food",
+    "Rest your voice as much as possible",
+    "Watch for side effects like nausea, loose stools, or stomach upset",
+    "Contact doctor if you develop severe diarrhea, vomiting, skin rash, itching, swelling, or difficulty breathing",
+    "Come for review follow up after 5 days or earlier if symptoms do not improve",
+    "If fever persists beyond 2-3 days or if you have difficulty swallowing or breathing, seek medical attention"
+  ],
+  "language": "tanglish",
+  "confidence": 0.8184293609671848,
+  "extraction_method": "groq",
+  "processing_time_sec": 33.373426,
+  "route": "groq_only"
+}

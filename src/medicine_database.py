@@ -3,60 +3,83 @@ Medicine Database and Drug Interaction Registry
 Comprehensive database of known drugs, dangerous combinations, and valid dose patterns
 """
 
+import sqlite3
+import os
+
 # Drug database - comprehensive list across multiple categories
-KNOWN_DRUGS = {
-    # Antibiotics
-    'erythromycin', 'amoxicillin', 'amoxicillin-clavulanic acid', 'augmentin',
-    'azithromycin', 'ciprofloxacin', 'levofloxacin', 'cephalexin', 'doxycycline',
-    'metronidazole', 'norfloxacin', 'cefixime',
+def _load_known_drugs():
+    # Base hardcoded drugs
+    drugs = {
+        # Antibiotics
+        'erythromycin', 'amoxicillin', 'amoxicillin-clavulanic acid', 'augmentin',
+        'azithromycin', 'ciprofloxacin', 'levofloxacin', 'cephalexin', 'doxycycline',
+        'metronidazole', 'norfloxacin', 'cefixime',
+        
+        # Analgesics & NSAIDs
+        'paracetamol', 'acetaminophen', 'ibuprofen', 'aspirin', 'diclofenac',
+        'naproxen', 'mefenamic acid', 'indomethacin',
+        
+        # Cough & Cold
+        'cough syrup', 'dextromethorphan', 'promethazine', 'codeine', 'terbutaline',
+        'levosalbutamol', 'salbutamol', 'albuterol', 'bromhexine', 'guaifenesin',
+        
+        # Antihistamines
+        'antihistamine', 'cetirizine', 'loratadine', 'fexofenadine', 'meclizine',
+        'chlorpheniramine', 'pheniramine', 'diphenhydramine',
+        
+        # Gastrointestinal
+        'antacid', 'omeprazole', 'pantoprazole', 'ranitidine', 'famotidine',
+        'domperidone', 'metoclopramide', 'ondansetron', 'loperamide',
+        
+        # Cardiovascular
+        'lisinopril', 'enalapril', 'ramipril', 'amlodipine', 'nifedipine',
+        'metoprolol', 'atenolol', 'bisoprolol', 'atorvastatin', 'simvastatin',
+        'losartan', 'valsartan', 'spironolactone', 'furosemide', 'hydrochlorothiazide',
+        
+        # Antihistamine/Decongestant
+        'phenylephrine', 'pseudoephedrine', 'oxymetazoline', 'xylometazoline',
+        
+        # Vitamins & Minerals
+        'vitamin', 'vitamin-c', 'vitamin-d', 'vitamin-b12', 'calcium', 'iron', 'zinc',
+        'multivitamin', 'ascorbic acid',
+        
+        # Antifungal
+        'fluconazole', 'ketoconazole', 'miconazole', 'clotrimazole', 'terbinafine',
+        
+        # Antiinflammatory
+        'corticosteroid', 'dexamethasone', 'methylprednisolone', 'prednisone',
+        'hydrocortisone', 'betamethasone',
+        
+        # Respiratory
+        'bronchodilator', 'inhaler', 'montelukast', 'theophylline',
+        
+        # Thyroid
+        'levothyroxine', 'liothyronine',
+        
+        # Diabetes
+        'metformin', 'glipizide', 'glyburide', 'sitagliptin', 'insulin',
+        
+        # Antibacterial Ointments
+        'antibiotic ointment', 'neomycin', 'bacitracin', 'polymyxin'
+    }
     
-    # Analgesics & NSAIDs
-    'paracetamol', 'acetaminophen', 'ibuprofen', 'aspirin', 'diclofenac',
-    'naproxen', 'mefenamic acid', 'indomethacin',
-    
-    # Cough & Cold
-    'cough syrup', 'dextromethorphan', 'promethazine', 'codeine', 'terbutaline',
-    'levosalbutamol', 'salbutamol', 'albuterol', 'bromhexine', 'guaifenesin',
-    
-    # Antihistamines
-    'antihistamine', 'cetirizine', 'loratadine', 'fexofenadine', 'meclizine',
-    'chlorpheniramine', 'pheniramine', 'diphenhydramine',
-    
-    # Gastrointestinal
-    'antacid', 'omeprazole', 'pantoprazole', 'ranitidine', 'famotidine',
-    'domperidone', 'metoclopramide', 'ondansetron', 'loperamide',
-    
-    # Cardiovascular
-    'lisinopril', 'enalapril', 'ramipril', 'amlodipine', 'nifedipine',
-    'metoprolol', 'atenolol', 'bisoprolol', 'atorvastatin', 'simvastatin',
-    'losartan', 'valsartan', 'spironolactone', 'furosemide', 'hydrochlorothiazide',
-    
-    # Antihistamine/Decongestant
-    'phenylephrine', 'pseudoephedrine', 'oxymetazoline', 'xylometazoline',
-    
-    # Vitamins & Minerals
-    'vitamin', 'vitamin-c', 'vitamin-d', 'vitamin-b12', 'calcium', 'iron', 'zinc',
-    'multivitamin', 'ascorbic acid',
-    
-    # Antifungal
-    'fluconazole', 'ketoconazole', 'miconazole', 'clotrimazole', 'terbinafine',
-    
-    # Antiinflammatory
-    'corticosteroid', 'dexamethasone', 'methylprednisolone', 'prednisone',
-    'hydrocortisone', 'betamethasone',
-    
-    # Respiratory
-    'bronchodilator', 'inhaler', 'montelukast', 'theophylline',
-    
-    # Thyroid
-    'levothyroxine', 'liothyronine',
-    
-    # Diabetes
-    'metformin', 'glipizide', 'glyburide', 'sitagliptin', 'insulin',
-    
-    # Antibacterial Ointments
-    'antibiotic ointment', 'neomycin', 'bacitracin', 'polymyxin'
-}
+    # Try to load from SQLite database if available
+    db_path = os.path.join(os.path.dirname(__file__), 'medicine_master.db')
+    if os.path.exists(db_path):
+        try:
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT Medicine FROM medicines")
+            rows = cursor.fetchall()
+            for row in rows:
+                drugs.add(row[0].lower())
+            conn.close()
+        except Exception as e:
+            print(f"Warning: Could not load medicines from database: {e}")
+            
+    return drugs
+
+KNOWN_DRUGS = _load_known_drugs()
 
 # Dangerous combinations - drugs that should not be prescribed together
 DANGEROUS_COMBINATIONS = {
@@ -72,11 +95,15 @@ DANGEROUS_COMBINATIONS = {
 
 # Valid dose patterns for validation
 DOSE_PATTERNS = {
-    'mg': r'\d+\s*mg',
-    'ml': r'\d+\s*ml',
-    'mcg': r'\d+\s*mcg',
+    'mg': r'\d+(?:\.\d+)?\s*mg',
+    'ml': r'\d+(?:\.\d+)?\s*ml',
+    'mcg': r'\d+(?:\.\d+)?\s*mcg',
+    'gm': r'\d+(?:\.\d+)?\s*g(?:m|ram)?',
+    'iu': r'\d+\s*iu',
     'tablet': r'\d+\s*tablet',
     'capsule': r'\d+\s*capsule',
+    'drops': r'\d+\s*drops?',
+    'units': r'\d+\s*units?',
 }
 
 # Drug name corrections - maps transcription errors to correct names
@@ -103,7 +130,9 @@ DRUG_CORRECTIONS = {
     # More antibiotic variations
     r'\bazithro\w*\b': 'azithromycin',
     r'\bcipro\w*\b': 'ciprofloxacin',
-    r'\blevo\w*\b': 'levofloxacin',
+    r'\blevoflox\w*\b': 'levofloxacin',
+    r'\blevocet\w*\b': 'levocetirizine',
+    r'\blevosid\w*\b': 'levocetirizine',
     r'\bcephalex\w*\b': 'cephalexin',
     r'\bdoxyc\w*\b': 'doxycycline',
     r'\bmetro\w*\b': 'metronidazole',
@@ -111,6 +140,13 @@ DRUG_CORRECTIONS = {
     r'\bpraceta\w*\b': 'paracetamol',
     r'\bacetamin\w*\b': 'acetaminophen',
     r'\bibupr\w*\b': 'ibuprofen',
+    # New medicines mentions
+    r'\bbenzid\w*\b': 'benzydamine',
+    r'\bbenzodiazine\b': 'benzydamine',
+    r'\btrepsil\w*\b': 'strepsils',
+    r'\blozenge\w*\b': 'throat lozenges',
+    r'\bvitamin\s+c\b': 'vitamin c',
+    r'\bzinc\b': 'zinc supplement',
     r'\bdic\w*\b': 'diclofenac',
     # Cough syrup variations
     r'\bterbutal\w*\b': 'terbutaline',
@@ -163,8 +199,8 @@ DIAGNOSIS_KEYWORDS = {
 
 # Standard medical advice phrases (for throat/infection conditions)
 STANDARD_ADVICE = [
-    "Take erythromycin after food to avoid stomach discomfort",
-    "Complete the full 5 day course of antibiotics",
+    "Take medicine after food to avoid stomach discomfort",
+    "Complete the full 5 day course if prescribed antibiotics",
     "Drink plenty of warm fluids",
     "Do warm salt water gargles 3-4 times a day",
     "Avoid very cold drinks",

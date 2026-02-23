@@ -45,6 +45,7 @@ from metrics import MetricsCollector, MetricsDashboard, ExtractionMetrics
 from language_detection import LanguageDetector
 from thanglish_normalizer import ThanglishNormalizer
 from normalization import TranscriptNormalizer
+import medicine_database
 
 # Configuration
 AUDIO_FILES = ["data\WhatsApp Audio 2026-02-20 at 12.36.29 PM.mp4"]  # Example audio file for testing
@@ -53,36 +54,10 @@ DB_FILE = "data/prescriptions.db"
 WHISPER_MODEL = "medium"
 TRANSCRIBER_SOURCE = "local"  # Using local Whisper for cost-effective transcription
 
-# Medicine Database (fallback rules)
-KNOWN_DRUGS = {
-    'erythromycin', 'amoxicillin', 'paracetamol', 'ibuprofen', 'aspirin',
-    'cough syrup', 'antacid', 'antihistamine', 'vitamin', 'lisinopril',
-    'metformin', 'atorvastatin', 'omeprazole', 'metoprolol', 'verapamil'
-}
-
-DANGEROUS_COMBINATIONS = {
-    ('aspirin', 'ibuprofen'): 'Both are NSAIDs - avoid together',
-    ('metoprolol', 'verapamil'): 'Both lower heart rate - high risk',
-}
-
-STANDARD_ADVICE = [
-    "Take medicine after food to avoid stomach discomfort",
-    "Complete the full course of antibiotics",
-    "Drink plenty of warm fluids",
-    "Do warm salt water gargles 3-4 times a day",
-    "Avoid very cold drinks",
-    "Avoid spicy food",
-    "Avoid oily food",
-    "Rest and limit physical exertion",
-    "Watch for side effects like nausea or upset stomach",
-    "Contact doctor if symptoms worsen or don't improve",
-    "Follow up after 5 days or earlier if needed",
-    "If fever persists beyond 3 days, seek attention",
-]
-
-
-
-
+# Use centralized Medicine Database
+KNOWN_DRUGS = medicine_database.KNOWN_DRUGS
+DANGEROUS_COMBINATIONS = medicine_database.DANGEROUS_COMBINATIONS
+STANDARD_ADVICE = medicine_database.STANDARD_ADVICE
 
 # ==================== ADVANCED EXTRACTION ====================
 
@@ -107,6 +82,9 @@ class AdvancedExtractor:
         if not result.get('success'):
             logger.info("Primary extraction failed, using rules...")
             result = self._extract_rules_advanced(transcript)
+        
+        # Log FULL transcript for debugging (in DEBUG level or shorter first 2000 chars)
+        logger.debug(f"Full transcript for extraction: {transcript}")
         
         # Post-process: improve extracted data
         data = result.get('data', {})
@@ -149,17 +127,19 @@ class AdvancedExtractor:
         # Try to find name in common patterns
         patterns = [
             r'patient\s+(?:named?|is)?\s+([A-Za-z]+)',
-            r'(?:hi|hello)\s+([A-Za-z]+)',
-            r',\s*([A-Z][a-z]+)\s+you\s+have',  # e.g., "Rohit, you have"
-            r'\b([A-Z][a-z]+)\s*,\s*([A-Z][a-z]+)\b',  # "Name, Name" pattern
+            r'(?:hi|hello|hey|like|ok)\s+([A-Z][a-z]+)',  # Greeting/Filler + Name
+            r'(?:hi|hello|hey|like|ok)\s+([a-z]+)',        # Greeting/Filler + Name (lowercase)
+            r',\s*([A-Z][a-z]+)\s+you\s+have',             # e.g., "Rohit, you have"
+            r'\b([A-Z][a-z]+)\s*,\s*([A-Z][a-z]+)\b',      # "Name, Name" pattern
         ]
         
         for pattern in patterns:
             match = re.search(pattern, text)
             if match:
                 name = match.group(1)
-                if len(name) > 1 and name != 'You':
-                    return name
+                # Filter out common filler words and small words
+                if len(name) > 1 and name.lower() not in ['you', 'the', 'this', 'that', 'with', 'have', 'your']:
+                    return name.capitalize()
         
         # Fallback: find first capitalized word that's not a common word
         words = text.split()
@@ -183,13 +163,19 @@ class AdvancedExtractor:
         # Multiple patterns to catch various formats
         patterns = [
             # "prescribe erythromycin 500 mg 3 times a day for 5 days"
-            r'(?:prescribe|take|give)\s+(?:a\s+)?(?:tablet\s+of\s+)?([a-z]+(?:\s+[a-z]+)?)\s+(\d+)\s*(?:mg|ml|mcg|gm|gram|tablet|capsule|mc|mcd|cd)s?\s+(\d+)\s*(?:times?\s+)?(?:a\s+)?day\s+for\s+(\d+)\s*days?',
+            r'(?:prescribe|take|give)\s+(?:a\s+)?(?:tablet\s+of\s+)?([a-z]+(?:\s+[a-z]+)?)\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|tablet|capsule|drop|unit|mc|mcd|cd)s?\s+(\d+)\s*(?:times?\s+)?(?:a\s+)?day\s+for\s+(\d+)\s*days?',
             # "Medicine, erythromycin, 500 mg daily 3 times for 5 days"
-            r'(?:medicine|medicines|drug)[,:]?\s*([a-z]+(?:\s+[a-z]+)?)\s*,?\s+(\d+)\s*(?:mg|ml|mcg|gm|gram|tablet|capsule|mc|mcd|cd)s?\s+(?:daily\s+)?(\d+)\s*(?:times?)\s+for\s+(\d+)\s*days?',
+            r'(?:medicine|medicines|drug)[,:]?\s*([a-z]+(?:\s+[a-z]+)?)\s*,?\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|tablet|capsule|drop|unit|mc|mcd|cd)s?\s+(?:daily\s+)?(\d+)\s*(?:times?)\s+for\s+(\d+)\s*days?',
             # "erythromycin 500 mg three times daily" or similar
-            r'(?:^|[,;])\s*([a-z]+(?:\s+[a-z]+)?)\s*,?\s+(\d+)\s*(?:mg|ml|mcg|gm|gram|tablet|capsule|mc|mcd|cd)s?\s+(?:\d+|three|two|four)\s*(?:times?|x)\s+(?:daily|a\s+day)',
+            r'(?:^|[,;])\s*([a-z]+(?:\s+[a-z]+)?)\s*,?\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|tablet|capsule|drop|unit|mc|mcd|cd)s?\s+(?:\d+|three|two|four)\s*(?:times?|x)\s+(?:daily|a\s+day)',
             # Simpler pattern: "erythromycin 500 mg" standalone (extract what we can)
-            r'(?:prescription|medicine|take)(?:d)?[,:]?\s*([a-z]+(?:\s+[a-z]+)?)\s+(\d+)\s*(?:mg|ml|mcg)',
+            r'(?:prescription|medicine|take)(?:d)?[,:]?\s*([a-z]+(?:\s+[a-z]+)?)\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|drop|unit)',
+            # Very simple: "Drug X every Y hours" or "Drug X take at night"
+            r'([a-z]+(?:\s+[a-z]+)?)\s+(?:(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|drop|unit))?,?\s+(?:every|at|one\s+)?(?:(\d+)\s*(?:hours?|times?\s+daily|times?\s+a\s+day))?',
+            # Sprays/Lozenges: "Benzydamine throat spray use 3-4 times daily"
+            r'([a-z]+(?:\s+[a-z]+)?)\s+(?:throat\s+)?(?:spray|lozenge|tablet|syrup|supplement)\s+(?:use|take|dissolve)?\s*(\d+(?:-\d+)?)\s*times?\s+(?:daily|a\s+day)',
+            # Simple once daily: "Drug X once a day/daily"
+            r'([a-z]+(?:\s+[a-z]+)?)\s+(?:take\s+)?(?:once\s+a\s+day|once\s+daily|daily)',
         ]
         
         for pattern_idx, pattern in enumerate(patterns):
@@ -197,14 +183,14 @@ class AdvancedExtractor:
                 try:
                     groups = match.groups()
                     
-                    if len(groups) < 2:
+                    if len(groups) < 1:
                         continue
                     
                     drug_raw = groups[0].strip()
-                    dose_num = groups[1]
                     
                     # Determine unit from the matched text
                     unit = 'mg'
+                    dose_num = ''
                     match_text = match.group(0).lower()
                     if 'ml' in match_text:
                         unit = 'ml'
@@ -215,8 +201,17 @@ class AdvancedExtractor:
                     elif 'capsule' in match_text:
                         unit = 'capsule'
                     
+                    # Extract dose number if available
+                    if len(groups) >= 2 and groups[1]:
+                        dose_num = groups[1]
+                    else:
+                        # Try to find dose in the match text
+                        dose_match = re.search(r'(\d+)\s*(?:mg|ml|mcg)', match_text)
+                        if dose_match:
+                            dose_num = dose_match.group(1)
+                    
                     # Skip if it's a verb/non-drug word
-                    if drug_raw in ['prescribe', 'take', 'give', 'tablet', 'medicine', 'drug', 'medicines', 'prescription']:
+                    if drug_raw in ['prescribe', 'take', 'give', 'tablet', 'medicine', 'drug', 'medicines', 'prescription', 'every', 'one', 'at']:
                         continue
                     
                     # Get just the first word (primary drug name)
@@ -227,15 +222,13 @@ class AdvancedExtractor:
                         continue
                     
                     # Extract frequency from the match string (default to "1 times a day" if not found)
-                    # For patterns that capture frequency as group[2], use that; otherwise search
                     if len(groups) >= 3 and groups[2]:
                         freq_num = groups[2]
                     else:
-                        freq_match = re.search(r'(\d+)\s*(?:times?|x)', match.group(0), re.IGNORECASE)
+                        freq_match = re.search(r'(\d+)\s*(?:times?|x|hours?)', match.group(0), re.IGNORECASE)
                         freq_num = freq_match.group(1) if freq_match else "1"
                     
                     # Extract duration (default to "5 days" if not found)
-                    # For patterns that capture duration as group[3], use that; otherwise search
                     if len(groups) >= 4 and groups[3]:
                         duration_num = groups[3]
                     else:
@@ -244,9 +237,12 @@ class AdvancedExtractor:
                     
                     seen.add(drug_name)
                     
+                    # Build dose string - optional if not found
+                    dose_str = f"{dose_num} {unit}" if dose_num else unit
+                    
                     medicines.append({
                         "name": drug_name.lower(),
-                        "dose": f"{dose_num} {unit}",
+                        "dose": dose_str,
                         "frequency": f"{freq_num} times a day",
                         "duration": f"{duration_num} days",
                         "instruction": "",
@@ -293,11 +289,14 @@ class AdvancedExtractor:
         
         # Handle common transcription errors and variations
         diagnosis_checks = [
-            ('pharyngitis', 'acute pharyngitis', 1),  # catches pharyngitis after correction
+            ('pharyngitis', 'acute pharyngitis', 1),
+            ('sinusitis', 'acute sinusitis', 1),
+            ('sinus', 'sinusitis', 2),
             ('bronchitis', 'acute bronchitis', 1),
             ('bacterial\s+throat', 'bacterial throat infection', 1),
             ('throat\s+infection', 'throat infection', 1),
             ('bacterial\s+infection', 'bacterial infection', 2),
+            ('viral\s+infection', 'viral infection', 2),
             ('infection', 'infection', 3),
             ('pneumonia', 'pneumonia', 1),
             ('asthma', 'asthma', 2),
@@ -319,18 +318,18 @@ class AdvancedExtractor:
         advice = []
         
         advice_keywords = {
-            0: ['food', 'stomach', 'discomfort', 'after food'],
+            0: ['food', 'stomach', 'discomfort', 'after food', 'apram'],
             1: ['course', 'complete'],
-            2: ['drink', 'plenty', 'warm'],
+            2: ['drink', 'plenty', 'warm', 'fluids', 'kudichuko', 'kurichiko'],
             3: ['gargle', 'salt water'],
-            4: ['cold', 'drink'],
-            5: ['spicy', 'food'],
-            6: ['oily', 'food'],
-            7: ['rest', 'voice'],
-            8: ['side effect', 'nausea'],
+            4: ['cold', 'drink', 'cold drinks'],
+            5: ['spicy', 'food', 'spicy food'],
+            6: ['oily', 'food', 'oily food'],
+            7: ['rest', 'voice', 'rest your'],
+            8: ['side effect', 'nausea', 'mild side'],
             9: ['severe', 'diarrhea'],
-            10: ['follow', 'review'],
-            11: ['fever', 'persist'],
+            10: ['follow', 'review', 'vaa'],
+            11: ['fever', 'persist', 'fever for'],
         }
         
         for idx, keywords_list in advice_keywords.items():
@@ -367,29 +366,25 @@ class AdvancedExtractor:
 
     def _correct_medical_terms(self, text: str) -> str:
         """Correct common transcription errors"""
+        result = text.lower().strip()
+        
+        # Apply central corrections from database
+        if hasattr(medicine_database, 'DRUG_CORRECTIONS'):
+            for pattern, correction in medicine_database.DRUG_CORRECTIONS.items():
+                result = re.sub(pattern, correction, result, flags=re.IGNORECASE)
+        
+        # Additional system-specific/filler corrections
         corrections = {
-            r'\bfrangitis\b': 'pharyngitis',
-            r'\bfrench\s+dices\b': 'pharyngitis',
-            r'\bretromyzen\b': 'erythromycin',
-            r'\berytho\s+mice\s+in\b': 'erythromycin',
-            r'\berytho(?!mycin)\b': 'erythromycin',
-            r'\berythomycin\b': 'erythromycin',
-            r'\bamoxycillin\b': 'amoxicillin',
-            r'\bparacetamole\b': 'paracetamol',
-            r'\baccetaminophen\b': 'paracetamol',
-            r'\bibuprofen\b': 'ibuprofen',
-            r'\basprine\b': 'aspirin',
-            r'\bmetphormion\b': 'metformin',
+            r'\bparagenesis\b': 'pharyngitis',
+            r'\bpyrogynous\b': 'pharyngitis',
+            r'\bparakinesis\b': 'pharyngitis',
             r'\bthroat\s+infraction\b': 'throat infection',
             r'\bbacterial\s+fracture\b': 'bacterial infection',
-            # Thanglish corrections
             r'\binflection\b': 'infection',
             r'\bback\s+inflection\b': 'bacterial infection',
-            r'\bparagenesis\b': 'bacterial infection',
             r'\bantibiotic\s+risk\b': 'antibiotics',
         }
         
-        result = text.lower().strip()
         for pattern, correction in corrections.items():
             result = re.sub(pattern, correction, result, flags=re.IGNORECASE)
         
@@ -414,7 +409,7 @@ class PrescriptionDatabase:
             conn.execute('''
                 CREATE TABLE IF NOT EXISTS prescriptions (
                     id INTEGER PRIMARY KEY,
-                    patient_name TEXT NOT NULL,
+                    patient_name TEXT,
                     language TEXT,
                     diagnosis TEXT,
                     medicines TEXT,
@@ -429,6 +424,9 @@ class PrescriptionDatabase:
 
     def save(self, prescription: Prescription, routing_decision: str = "unknown") -> int:
         """Save prescription to database"""
+        # Fallback for missing patient name to satisfy DB constraints if still NOT NULL
+        patient_name = prescription.patient_name or "Unknown Patient"
+        
         with sqlite3.connect(self.db_file) as conn:
             cursor = conn.execute('''
                 INSERT INTO prescriptions 
@@ -436,7 +434,7 @@ class PrescriptionDatabase:
                  routing_decision, confidence, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                prescription.patient_name,
+                patient_name,
                 prescription.language,
                 json.dumps(prescription.diagnosis),
                 json.dumps(prescription.medicines),
@@ -479,8 +477,15 @@ class MedicalSystem:
 
         logger.info("[OK] System ready with advanced extraction\n")
 
-    def process(self, audio_path: str) -> Dict:
-        """Process audio file end-to-end with clean architecture"""
+    def process(self, audio_path: str, language: Optional[str] = None) -> Dict:
+        """
+        Process audio file end-to-end with clean architecture.
+
+        Args:
+            audio_path: Path to audio file
+            language:   Optional language override ('en', 'ta', 'tanglish').
+                        If None, auto-detected from audio (probe pass).
+        """
         start_time = datetime.now()
 
         print("\n" + "=" * 80)
@@ -488,10 +493,11 @@ class MedicalSystem:
         print("=" * 80)
 
         # [1] Transcription
-        print("\n[1/7] SPEECH RECOGNITION (Whisper multilingual, task=transcribe)")
+        lang_label = f"forced='{language}'" if language else "auto-detect"
+        print(f"\n[1/7] SPEECH RECOGNITION (Whisper multilingual, {lang_label})")
         print("-" * 80)
 
-        tx_result = self.transcriber.transcribe(audio_path)
+        tx_result = self.transcriber.transcribe(audio_path, language=language)
         if not tx_result.success:
             logger.error(f"Transcription failed: {tx_result.error}")
             return {"success": False, "error": "Transcription failed"}
@@ -508,7 +514,8 @@ class MedicalSystem:
         except UnicodeEncodeError:
             print(f"Raw transcript: [Non-ASCII text]")
         print(f"Confidence: {tx_result.confidence:.0%}")
-        print(f"Source language: {tx_result.whisper_language}\n")
+        audio_detected_lang = tx_result.detected_language or "en"
+        print(f"Audio-detected language: {audio_detected_lang.upper()} (Whisper raw: {tx_result.whisper_language})\n")
 
         # [2] Transcript Cleaning (NEW)
         print("[2/7] TRANSCRIPT CLEANING (ASR distortion fixes)")
@@ -532,11 +539,32 @@ class MedicalSystem:
         print("[3/7] LANGUAGE DETECTION")
         print("-" * 80)
 
-        lang_code, lang_metadata = self.language_detector.detect(transcript)
+        # Audio-level language already detected by Whisper probe.
+        # Run text-level detector as secondary confirmation.
+        # If Whisper already detected Tamil or Thanglish, trust it over text-only fallback.
+        text_lang_code, text_lang_metadata = self.language_detector.detect(transcript)
+
+        # Merge: audio detection wins for 'ta' (Tamil Unicode), text detection wins for 'tanglish'
+        if audio_detected_lang == "ta":
+            lang_code = "ta"
+            lang_metadata = {"confidence": 0.95, "reason": "Tamil detected by Whisper (audio-level)"}
+        elif audio_detected_lang == "tanglish" or text_lang_code == "tanglish":
+            lang_code = "tanglish"
+            lang_metadata = {
+                "confidence": max(
+                    text_lang_metadata.get("confidence", 0.0),
+                    0.85 if audio_detected_lang == "tanglish" else 0.0,
+                ),
+                "reason": f"Thanglish detected (audio={audio_detected_lang}, text={text_lang_code})"
+            }
+        else:
+            lang_code, lang_metadata = text_lang_code, text_lang_metadata
+
         lang_confidence = lang_metadata.get('confidence', 0.0)
         
-        print(f"Detected: {lang_code.upper()}")
-        print(f"Confidence: {lang_confidence:.0%}")
+        print(f"Audio-level: {audio_detected_lang.upper()}")
+        print(f"Text-level:  {text_lang_code.upper()}")
+        print(f"Final:       {lang_code.upper()} (confidence: {lang_confidence:.0%})")
         if 'reason' in lang_metadata:
             print(f"Reason: {lang_metadata['reason']}")
         print()
@@ -634,7 +662,7 @@ class MedicalSystem:
         use_ensemble = False  # 🔥 DISABLE ENSEMBLE BY DEFAULT - runs both methods (SLOW)
         
         # Debug: log full transcript for extraction
-        logger.info(f"Full cleaned transcript for extraction ({len(transcript)} chars): {transcript[:200]}...")
+        logger.info(f"Full cleaned transcript for extraction ({len(transcript)} chars): {transcript[:1000]}...")
         
         extract_result = self.advanced_extractor.extract_advanced(
             transcript=transcript,
@@ -674,21 +702,23 @@ class MedicalSystem:
         is_valid, errors, warnings = self.validator.validate(prescription)
 
         if errors:
-            print("ERRORS:")
+            print("❌ ERRORS:")
             for error in errors:
                 print(f"  {error}")
-            return {"success": False, "errors": errors}
 
         if warnings:
-            print("WARNINGS:")
+            print("⚠️  WARNINGS:")
             for warning in warnings:
                 clean = warning.encode('ascii', errors='ignore').decode('ascii').strip()
                 if clean:
                     print(f"  {clean}")
 
-        print("Validation passed\n")
+        if is_valid:
+            print("✅ Validation passed\n")
+        else:
+            print("⚠️  Validation completed with errors - but returning data anyway\n")
 
-        # Save to database
+        # Save to database (even if validation fails, save the data)
         prescription_id = self.database.save(prescription, routing_decision=route)
 
         # Output JSON

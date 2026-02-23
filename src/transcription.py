@@ -1,20 +1,18 @@
 """
 Transcription Module: OpenAI Whisper API-based audio transcription.
 
-Uses OpenAI's Whisper API for reliable multilingual transcription
-with Groq for LLM extraction provides optimal performance.
+Supports UNLABELED voice input — automatically detects spoken language:
+  - English: Transcribed with medical prompt in English
+  - Tamil (Unicode): Transcribed with Tamil language hint, output translated to English
+  - Thanglish: Transcribed in multilingual mode with Thanglish-aware prompt
 
-Quality signals:
-  1. Word density — words vs audio duration
-  2. Medical keyword presence 
-  3. Overall transcript coherence
+Detection strategy:
+  1. Probe pass (short, no language hint) → Whisper reports detected language
+  2. Confirm with LanguageDetector on probe text → decide final mode
+  3. Full transcription with correct language + prompt
 
 Cleaning:
-  After transcription, apply TranscriptCleaner to fix any ASR distortions:
-  - inflection → infection
-  - antibiotic risk → antibiotics
-  - kayachel → fever (Thanglish ASR error)
-  - etc.
+  After transcription, apply TranscriptCleaner to fix any ASR distortions.
 """
 
 import os
@@ -46,10 +44,11 @@ class TranscriptionResult:
     """Standard transcription output format."""
     success: bool
     text: str = ""
-    whisper_language: str = ""
+    whisper_language: str = ""      # Language code Whisper detected
+    detected_language: str = ""     # Final resolved language: 'en', 'ta', 'tanglish'
     confidence: float = 0.0
     transcription_tier: int = 1
-    cleaned_length: int = 0  # Track transcript length after cleaning
+    cleaned_length: int = 0
     error: Optional[str] = None
 
 
@@ -156,9 +155,19 @@ class TranscriptCleaner:
 
 class WhisperTranscriber:
     """
-    OpenAI Whisper API-based transcriber for reliable multilingual transcription.
-    
-    Uses OpenAI's whisper-1 model which handles English/Tamil/Thanglish excellently.
+    OpenAI Whisper API-based transcriber with AUTO LANGUAGE DETECTION.
+
+    Handles UNLABELED voice input — no need to specify language upfront.
+
+    Detection flow:
+      1. PROBE PASS  — short Whisper call (no language hint) to detect spoken language
+      2. TEXT CONFIRM — LanguageDetector validates probe text for Thanglish markers
+      3. FULL PASS   — transcribe with correct language hint + language-specific prompt
+
+    Supported languages:
+      - 'en'       → English medical prompt
+      - 'ta'       → Tamil + translate-to-English instruction
+      - 'tanglish' → Multilingual prompt (Tamil in English letters)
     """
 
     MEDICAL_KEYWORDS = {
@@ -168,59 +177,283 @@ class WhisperTranscriber:
         "symptoms", "treatment", "daily", "twice", "thrice", "morning", "night",
         "days", "weeks", "throat", "cough", "cold", "bacterial", "pharyngitis",
         "bronchitis", "pneumonia", "infection", "allergy", "asthma",
+        # Tamil/Thanglish medical keywords for quality check
+        "marunthu", "vali", "kaichal", "noi", "sapadu",
     }
-    MIN_WORDS = 20  # Minimum acceptable words in transcript
+    MIN_WORDS = 15  # Minimum acceptable words in transcript
+
+    # Language-specific Whisper prompts for better accuracy
+    PROMPTS = {
+        "en": (
+            "Medical consultation in English. Doctor prescribing medicines. "
+            "Include drug names, dosages, frequency, and patient advice."
+        ),
+        "ta": (
+            "மருத்துவ ஆலோசனை. மருத்துவர் மருந்துகளை பரிந்துரைக்கிறார். "
+            "Translate all content to English medical terminology."
+        ),
+        "tanglish": (
+            "Medical consultation. Patient name, diagnosis, medicines with dosages. "
+            "Drug names, frequencies, durations. Tamil-origin words may appear."
+        ),
+    }
 
     def __init__(self, model_size: str = "base"):
         """Initialize OpenAI Whisper transcriber."""
         if not OPENAI_AVAILABLE:
             raise ImportError("OpenAI SDK not available. Install with: pip install openai")
-        
+
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OPENAI_API_KEY not set in environment. Please configure it in config/.env")
-        
+
         self.client = OpenAI(api_key=api_key)
         self.cleaner = TranscriptCleaner()
-        logger.info("[OK] OpenAI Whisper transcriber initialized (model: whisper-1)")
 
-    def transcribe(self, audio_path: str) -> TranscriptionResult:
-        """Transcribe audio using OpenAI Whisper API."""
+        # Import LanguageDetector for text-level Thanglish confirmation
+        try:
+            from language_detection import LanguageDetector
+            self.lang_detector = LanguageDetector()
+        except ImportError:
+            self.lang_detector = None
+            logger.warning("[WARN] LanguageDetector not available — text-level detection disabled")
+
+        logger.info("[OK] OpenAI Whisper transcriber initialized (auto language detection enabled)")
+
+    # ── Public API ─────────────────────────────────────────────────────────────
+
+    def transcribe(self, audio_path: str, language: Optional[str] = None) -> TranscriptionResult:
+        """
+        Transcribe audio with automatic language detection.
+
+        Args:
+            audio_path: Path to the audio file (.wav, .mp3, .mp4, etc.)
+            language:   Optional override. If None, auto-detect from audio.
+                        Pass 'en', 'ta', or 'tanglish' to skip detection.
+
+        Returns:
+            TranscriptionResult with detected_language field populated.
+        """
         try:
             if not os.path.exists(audio_path):
                 logger.error(f"Audio file not found: {audio_path}")
                 return TranscriptionResult(success=False, error=f"File not found: {audio_path}")
-            
-            logger.info(f"[WHISPER] Transcribing: {audio_path}")
-            
-            # Call OpenAI Whisper API
-            with open(audio_path, "rb") as audio_file:
-                response = self.client.audio.transcriptions.create(
-                    file=audio_file,
-                    model="whisper-1",
-                    language="en"  # English (handles Thanglish/Tamil mixed content)
-                )
-            
-            raw_text = response.text.strip()
-            logger.info(f"[WHISPER] Raw transcript ({len(raw_text)} chars): {raw_text[:100]}...")
-            
-            # Clean transcript
+
+            # ── Step 1: Detect language if not provided ─────────────────────
+            if language:
+                detected_lang = language
+                whisper_lang = "ta" if language == "ta" else "en"
+                logger.info(f"[LANG] Using provided language: {language}")
+            else:
+                detected_lang, whisper_lang = self._detect_language_from_audio(audio_path)
+
+            # ── Step 2: Full transcription with correct language ────────────
+            raw_text = self._transcribe_with_language(audio_path, detected_lang, whisper_lang)
+            if raw_text is None:
+                return TranscriptionResult(success=False, error="Transcription returned empty text")
+
+            logger.info(f"[WHISPER] Raw transcript ({len(raw_text)} chars): {raw_text[:120]}...")
+
+            # ── Step 3: Clean transcript ────────────────────────────────────
             cleaned_text, was_modified = self.cleaner.clean(raw_text)
             if was_modified:
-                logger.debug(f"[CLEAN] Applied: {len(raw_text)} → {len(cleaned_text)} chars")
-            
-            # Validate
-            if self._quality_ok(cleaned_text):
-                return self._build_result(cleaned_text)
-            else:
-                logger.warning("[QUALITY] Transcript is sparse but proceeding")
-                return self._build_result(cleaned_text)
-        
+                logger.debug(f"[CLEAN] Applied corrections: {len(raw_text)} → {len(cleaned_text)} chars")
+
+            # ── Step 4: Quality check ───────────────────────────────────────
+            if not self._quality_ok(cleaned_text):
+                logger.warning("[QUALITY] Transcript is sparse but proceeding anyway")
+
+            return self._build_result(cleaned_text, detected_lang, whisper_lang)
+
         except Exception as e:
             logger.error(f"[ERROR] OpenAI transcription failed: {e}")
             return TranscriptionResult(success=False, error=str(e))
 
-    # ── Internal helpers ────────────────────────────────────────────────────────
+    # ── Language detection ─────────────────────────────────────────────────────
+
+    def _detect_language_from_audio(self, audio_path: str) -> tuple:
+        """
+        Detect spoken language from unlabeled audio using a two-step approach:
+          1. Probe Whisper with no language hint — get Whisper's best guess
+          2. Run LanguageDetector on probe text — confirm Thanglish vs English
+
+        Returns:
+            (detected_lang, whisper_lang)
+            detected_lang: 'en', 'ta', or 'tanglish'
+            whisper_lang:  Whisper API language code ('en', 'ta', or None for auto)
+        """
+        logger.info("[DETECT] Probing audio for language detection (no language hint)...")
+
+        try:
+            with open(audio_path, "rb") as audio_file:
+                probe_response = self.client.audio.transcriptions.create(
+                    file=audio_file,
+                    model="whisper-1",
+                    # No language= parameter → Whisper auto-detects
+                    response_format="verbose_json",  # Gives us language + segments
+                )
+
+            whisper_detected = getattr(probe_response, "language", "en") or "en"
+            probe_text = getattr(probe_response, "text", "").strip()
+
+            logger.info(f"[DETECT] Whisper detected language: '{whisper_detected}'")
+            logger.info(f"[DETECT] Probe text sample: {probe_text[:100]}")
+
+            # ── Map Whisper language to our categories ────────────────────
+            if whisper_detected == "tamil" or whisper_detected == "ta":
+                # Could be pure Tamil OR Thanglish — check text for Thanglish markers
+                if self.lang_detector and probe_text:
+                    text_lang, meta = self.lang_detector.detect(probe_text)
+                    if text_lang == "tanglish":
+                        logger.info(f"[DETECT] Tamil audio but text has Thanglish markers → 'tanglish' mode")
+                        return "tanglish", "en"  # Thanglish: transcribe as English
+                    else:
+                        logger.info(f"[DETECT] Pure Tamil detected → 'ta' mode")
+                        return "ta", "ta"  # Pure Tamil
+                else:
+                    return "ta", "ta"
+
+            elif whisper_detected in ("english", "en"):
+                # English — but COULD be Thanglish (Tamil-origin words in English script).
+                # Require a HIGH threshold to override Whisper's 'english' judgement.
+                # Low counts (≤5) are likely just English medical terms being flagged,
+                # not genuine Tamil-in-English-script (Thanglish).
+                THANGLISH_OVERRIDE_THRESHOLD = 6  # require strong evidence to override
+                if self.lang_detector and probe_text:
+                    text_lang, meta = self.lang_detector.detect(probe_text)
+                    matches = meta.get('thanglish_matches', 0)
+                    if text_lang == "tanglish" and matches >= THANGLISH_OVERRIDE_THRESHOLD:
+                        logger.info(
+                            f"[DETECT] English audio with {matches} Thanglish markers "
+                            f"(≥{THANGLISH_OVERRIDE_THRESHOLD}) → 'tanglish' mode"
+                        )
+                        return "tanglish", "en"
+                    elif text_lang == "tanglish":
+                        logger.info(
+                            f"[DETECT] English audio — only {matches} Thanglish markers "
+                            f"(threshold={THANGLISH_OVERRIDE_THRESHOLD}), treating as English"
+                        )
+
+                logger.info("[DETECT] English detected → 'en' mode")
+                return "en", "en"
+
+            else:
+                # Unknown/unsupported language (e.g., Hindi, Telugu)
+                # Try text detection on probe output
+                if self.lang_detector and probe_text:
+                    text_lang, _ = self.lang_detector.detect(probe_text)
+                    logger.info(f"[DETECT] Unknown Whisper lang '{whisper_detected}', "
+                                f"text detector says '{text_lang}' → using '{text_lang}'")
+                    whisper_api_lang = "ta" if text_lang == "ta" else "en"
+                    return text_lang, whisper_api_lang
+
+                logger.warning(f"[DETECT] Unrecognized language '{whisper_detected}', defaulting to English")
+                return "en", "en"
+
+        except Exception as e:
+            logger.warning(f"[DETECT] Language probe failed: {e} — defaulting to multilingual mode")
+            # Fallback: no language hint, use Thanglish-aware prompt
+            return "tanglish", None
+
+    # ── Transcription helpers ──────────────────────────────────────────────────
+
+    def _transcribe_with_language(self, audio_path: str, detected_lang: str,
+                                   whisper_lang: Optional[str]) -> Optional[str]:
+        """
+        Perform the actual Whisper transcription with the correct language + prompt.
+
+        Args:
+            audio_path:    Path to audio file
+            detected_lang: 'en', 'ta', or 'tanglish'
+            whisper_lang:  Whisper API language code, or None for auto
+        """
+        prompt = self.PROMPTS.get(detected_lang, self.PROMPTS["en"])
+
+        logger.info(f"[WHISPER] Transcribing as '{detected_lang}' "
+                    f"(whisper_lang={whisper_lang!r})")
+
+        kwargs = {
+            "file": None,  # set in context manager below
+            "model": "whisper-1",
+            "prompt": prompt,
+        }
+        if whisper_lang:  # None means no language hint (auto)
+            kwargs["language"] = whisper_lang
+
+        # For Tamil: request translation to English
+        if detected_lang == "ta":
+            try:
+                with open(audio_path, "rb") as audio_file:
+                    response = self.client.audio.translations.create(
+                        file=audio_file,
+                        model="whisper-1",
+                        # Keep prompt short and non-instructional to avoid echo
+                        prompt="Medical consultation. Drug names and dosages.",
+                    )
+                text = response.text.strip()
+                # Strip any prompt-echo artifacts from the beginning
+                text = self._strip_prompt_echo(text)
+                logger.info(f"[WHISPER] Tamil → English translation: {len(text)} chars")
+                return text
+            except Exception as e:
+                logger.warning(f"[WHISPER] Translation failed: {e} — falling back to transcription")
+                # Fall through to standard transcription below
+                kwargs["language"] = "ta"
+
+        # Standard transcription (English / Thanglish)
+        with open(audio_path, "rb") as audio_file:
+            kwargs["file"] = audio_file
+            response = self.client.audio.transcriptions.create(**kwargs)
+
+        text = response.text.strip() if response.text else None
+        # Strip any prompt-echo that Whisper may have prepended
+        if text and detected_lang == "tanglish":
+            text = self._strip_prompt_echo(text)
+        return text
+
+    def _strip_prompt_echo(self, text: str) -> str:
+        """
+        Remove Whisper prompt-echo artifacts from the start of translation output.
+
+        Whisper sometimes prefixes the output with text from the prompt like:
+          "Translate to English. Translate to Malayalam. If you have..."
+
+        This strips those echo patterns, leaving only the real medical content.
+        """
+        if not text:
+            return text
+
+        # Lines that are pure meta/instruction echoes (not real content)
+        ECHO_PATTERNS = [
+            r'^translate\s+to\s+\w+[.,]?\s*',
+            r'^translation[:\s]+',
+            r'^english\s+translation[:\s]+',
+            r'^medical\s+consultation[.,]?\s*',
+            r'^doctor\s+prescribing[^.]*\.\s*',
+            r'^drug\s+names[^.]*\.\s*',
+            r'^transcribe\s+exactly\s+as\s+spoken[.,]?\s*',
+            r'^patient\s+name[,\s]+diagnosis[^.]*\.\s*',
+        ]
+
+        import re as _re
+        cleaned = text
+
+        # Repeatedly strip echo lines from the beginning (handles multiple echoed sentences)
+        changed = True
+        while changed:
+            changed = False
+            for pattern in ECHO_PATTERNS:
+                new = _re.sub(pattern, '', cleaned, flags=_re.IGNORECASE).strip()
+                if new != cleaned:
+                    cleaned = new
+                    changed = True
+
+        if cleaned != text:
+            logger.info(f"[CLEAN] Stripped prompt echo: removed {len(text) - len(cleaned)} chars from start")
+
+        return cleaned if cleaned else text  # fallback to original if we over-stripped
+
+    # ── Internal helpers ───────────────────────────────────────────────────────
 
     def _quality_ok(self, text: str) -> bool:
         """Check if transcript has minimum content."""
@@ -228,26 +461,29 @@ class WhisperTranscriber:
         if words < self.MIN_WORDS:
             logger.warning(f"[QUALITY] Low word count: {words} words (need >={self.MIN_WORDS})")
             return False
-        
-        # Check for medical keywords
+
         text_lower = text.lower()
         has_medical = any(kw in text_lower for kw in self.MEDICAL_KEYWORDS)
         if not has_medical:
             logger.warning("[QUALITY] No medical keywords detected")
-        
         return True
 
-    def _build_result(self, text: str) -> TranscriptionResult:
+    def _build_result(self, text: str, detected_lang: str = "en",
+                      whisper_lang: str = "en") -> TranscriptionResult:
         """Package result into standard format."""
         text = text.strip()
         confidence = 0.92  # OpenAI Whisper is highly reliable
-        
-        logger.info(f"[OK] Transcribed ({len(text)} chars, {len(text.split())} words)")
-        
+
+        logger.info(
+            f"[OK] Transcribed ({len(text)} chars, {len(text.split())} words) "
+            f"[lang={detected_lang}]"
+        )
+
         return TranscriptionResult(
             success=True,
             text=text,
-            whisper_language="en",
+            whisper_language=whisper_lang or "auto",
+            detected_language=detected_lang,
             confidence=confidence,
             transcription_tier=1,
             cleaned_length=len(text),

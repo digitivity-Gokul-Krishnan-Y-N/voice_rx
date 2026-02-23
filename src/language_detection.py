@@ -22,32 +22,99 @@ class LanguageDetector:
 
     # Common Thanglish medical terms (Tamil words written in English)
     THANGLISH_MEDICAL_TERMS = {
-        'noi': 'நோய்',              # disease
-        'marunthu': 'மருந்து',       # medicine
-        'vali': 'வலி',              # pain
-        'kaichal': 'காய்ச்சல்',      # fever
-        'kayachel': 'காய்ச்சல்',     # fever (variant)
-        'kaiachel': 'காய்ச்சல்',     # fever (variant)
-        'sapadu': 'சாப்பாடு',        # food
-        'kaalai': 'காலை',           # morning
-        'iravu': 'இரவு',            # night
-        'oru': 'ஒரு',              # one
-        'maaram': 'மாரம்',          # chest
-        'usna': 'உஷ்ணம்',          # heat/fever
-        'moolai': 'மூளை',          # brain
-        'valiyal': 'வலிய',          # pain
-        'puyasu': 'பூச்சு',          # allergy
-        'kai': 'கை',               # hand
-        'kan': 'கண்',              # eye
-        'paathai': 'பாதம்',         # foot
-        'siram': 'சிரம்',           # head
-        'izhuppu': 'இழுப்பு',       # pulling pain
+        # Nouns - medical
+        'noi': 'disease',
+        'marunthu': 'medicine',
+        'vali': 'pain',
+        'kaichal': 'fever',
+        'kayachel': 'fever',
+        'kaiachel': 'fever',
+        'sapadu': 'food',
+        'kaalai': 'morning',
+        'iravu': 'night',
+        'oru': 'one',
+        'maaram': 'chest',
+        'usna': 'heat',
+        'moolai': 'brain',
+        'kai': 'hand',
+        'kan': 'eye',
+        'siram': 'head',
+        'mookkadaippu': 'nasal congestion',
+        # Verbs / Action words (very common in Thanglish)
+        'pannu': 'do/use',
+        'pannalam': 'can do',
+        'pannalaam': 'can do',
+        'panna': 'to do',
+        'panren': 'I suggest/do',
+        'eduthukko': 'take it',
+        'edukkalaam': 'can take',
+        'kudichuko': 'drink it',
+        'kurichiko': 'drink it',
+        'varalam': 'may come/have',
+        'varalaam': 'may come/have',
+        'varum': 'will come',
+        'agum': 'will become',
+        'agam': 'will become',
+        'aagum': 'will become',
+        'agavam': 'to become',
+        'aagavum': 'to help become',
+        'irukku': 'is/has',
+        'irundha': 'if there is',
+        'irukkura': 'existing',
+        # Connectors / prepositions
+        'appram': 'after',
+        'apram': 'after',
+        'la': 'in/at',
+        'idhu': 'this',
+        'idu': 'this',
+        'idaku': 'for this',
+        'adhanala': 'because of that',
+        'maadhiri': 'like/similar',
+        'madhuri': 'like/similar',
+        'nala': 'for/due to',
+        'nerea': 'a lot',
+        'neraya': 'a lot',
+        'konjam': 'a little',
+        'kammi': 'reduce/less',
+        'kami': 'reduce',
+        'romba': 'very',
+        'illa': 'or/no',
+        'illana': 'otherwise',
+        'silla': 'some',
+        'sila': 'some',
+        'naal': 'days',
+        'naalu': 'days/four',
+        'udane': 'immediately',
+        'aana': 'but/after',
+        'ana': 'but',
+        'koodadhu': 'should not',
+        'kudadu': 'should not',
+        'nallu': 'good',
+        'pakkathula': 'near/side',
+        'unakku': 'to you',
+        'unatku': 'to you',
+        'thoonguna': 'sleeping',
+        'thunguna': 'sleeping',
+        'elevate': 'elevate',  # Used in Thanglish context: 'head elevate pannu'
+        'confirm': 'confirm',
+        'severity': 'severity',
+        'severe': 'severe',
+        'recurrent': 'recurrent',
+        'follow': 'follow',
+        'review': 'review',
+        'contact': 'contact',
+        'vaa': 'come',
+        'mukhiyam': 'important',
     }
 
-    # Thanglish patterns (regex) - Tamil transliterations
+    # Thanglish patterns — verb suffixes and Tamil transliterations
     THANGLISH_PATTERNS = [
         r'\b(noi|marunthu|vali|kaichal|kayachel|kaiachel|sapadu|kaalai|iravu)\b',
-        r'\b(oru|maaram|usna|moolai|valiyal|puyasu|kai|kan|paathai|siram|izhuppu)\b',
+        r'\b(pannu|pannalam|panna|panren|eduthukko|edukkalaam|kurichiko|kudichuko)\b',
+        r'\b(varalam|varalaam|varum|agum|aagum|agavam|aagavum|irukku|irundha)\b',
+        r'\b(apram|appram|adhanala|maadhiri|kammi|kami|romba|neraya|nerea|konjam)\b',
+        r'\b(idhu|idu|idaku|unakku|udane|illana|koodadhu|kudadu|thoonguna|thunguna)\b',
+        r'\b(naal|naalu|aana|ana|silla|sila|pakkathula|la\b)',  # short but distinctive
     ]
 
     def detect(self, text: str) -> Tuple[str, Dict[str, any]]:
@@ -83,12 +150,12 @@ class LanguageDetector:
             }
 
         elif has_thanglish and len(text) > 20:
-            # Tamil words in English + English text → Thanglish
+            # Tamil words + verbs in English + English text → Thanglish
             logger.info(f"[TANGLISH] Thanglish detected ({thanglish_matches} term matches)")
             return 'tanglish', {
-                'confidence': 0.8,
+                'confidence': min(0.95, 0.6 + thanglish_matches * 0.05),
                 'thanglish_matches': thanglish_matches,
-                'reason': f'Found {thanglish_matches} Tamil transliteration terms'
+                'reason': f'Found {thanglish_matches} Thanglish indicators (verbs/terms)'
             }
 
         else:
