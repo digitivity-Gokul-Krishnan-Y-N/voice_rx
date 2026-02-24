@@ -1,71 +1,14 @@
 {
   "success": true,
   "patient_name": null,
-  "complaints": [
-    "fever",
-    "facial pain",
-    "pulmonary edema",
-    "face pressure",
-    "headache",
-    "eye pain",
-    "vision problems"
-  ],
-  "diagnosis": [
-    "pulmonary inflammation",
-    "pulmonary edema"
-  ],
-  "medicines": [
-    {
-      "name": "amoxicillin",
-      "dose": null,
-      "frequency": "twice a day",
-      "duration": "5 days",
-      "instruction": null,
-      "route": "oral",
-      "side_effects": []
-    },
-    {
-      "name": "paracetamol",
-      "dose": "500 mg",
-      "frequency": "every 6-8 hours",
-      "duration": null,
-      "instruction": "as needed",
-      "route": "oral",
-      "side_effects": []
-    },
-    {
-      "name": "alin gel",
-      "dose": null,
-      "frequency": "3-4 times a day",
-      "duration": null,
-      "instruction": "topical",
-      "route": "oral",
-      "side_effects": []
-    },
-    {
-      "name": "levocetirizine",
-      "dose": null,
-      "frequency": "5 times a night",
-      "duration": null,
-      "instruction": "at night",
-      "route": "oral",
-      "side_effects": []
-    }
-  ],
+  "complaints": [],
+  "diagnosis": [],
+  "medicines": [],
   "tests": [],
-  "advice": [
-    "Take medicine after food to avoid stomach discomfort",
-    "Complete the full 5 day course if prescribed antibiotics",
-    "Drink plenty of warm fluids",
-    "Avoid very cold drinks",
-    "Rest your voice as much as possible",
-    "Watch for side effects like nausea, loose stools, or stomach upset",
-    "Contact doctor if you develop severe diarrhea, vomiting, skin rash, itching, swelling, or difficulty breathing",
-    "If fever persists beyond 2-3 days or if you have difficulty swallowing or breathing, seek medical attention"
-  ],
-  "language": "ar",
-  "confidence": 0.8420077399380804,
+  "advice": [],
+  "language": "tanglish",
+  "confidence": 0.6239247311827957,
   "extraction_method": "groq",
-  "processing_time_sec": 64.434136,
-  "route": "groq_only"
+  "processing_time_sec": 40.01388,
+  "route": "ensemble"
 }

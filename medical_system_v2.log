@@ -532,3 +532,39 @@
 2026-02-24 20:54:20,679 - WARNING - [QUALITY] No medical keywords detected
 2026-02-24 20:54:20,679 - INFO - [OK] Transcribed (1176 chars, 209 words) [lang=ar]
 2026-02-24 20:54:20,696 - INFO - [EN] English detected (default)
+2026-02-24 20:59:30,836 - INFO - 
+================================================================================
+2026-02-24 20:59:30,840 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-24 20:59:30,840 - INFO - ================================================================================
+2026-02-24 20:59:31,240 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-24 20:59:31,240 - INFO - Groq API key detected
+2026-02-24 20:59:31,255 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 20:59:32,666 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 20:59:32,666 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 20:59:32,667 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-24 20:59:32,668 - INFO - [OK] System ready with advanced extraction
+
+2026-02-24 20:59:32,669 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-24 20:59:56,385 - INFO - [DETECT] Whisper detected language: 'nynorsk'
+2026-02-24 20:59:56,385 - INFO - [DETECT] Probe text sample: I think I'm a monster. I'll give them what they deserve. I think I'm a monster. I'll give them what 
+2026-02-24 20:59:56,387 - INFO - [TANGLISH] Thanglish detected (2 term matches)
+2026-02-24 20:59:56,387 - INFO - [DETECT] Unknown Whisper lang 'nynorsk', text detector says 'tanglish' → using 'tanglish'
+2026-02-24 20:59:56,387 - INFO - [WHISPER] Transcribing as 'tanglish' (whisper_lang='en')
+2026-02-24 21:00:10,232 - INFO - [WHISPER] Raw transcript (327 chars): They think I'm a monster. I'll give them what they deserve. They think I'm a monster. I'll give them what they deserve. ...
+2026-02-24 21:00:10,232 - WARNING - [QUALITY] No medical keywords detected
+2026-02-24 21:00:10,232 - INFO - [OK] Transcribed (327 chars, 62 words) [lang=tanglish]
+2026-02-24 21:00:10,232 - INFO - [EN] English detected (default)
+2026-02-24 21:00:10,232 - INFO - [THANGLISH] No Thanglish terms found for normalization
+2026-02-24 21:00:10,252 - INFO - [NORMALIZE] No normalization needed
+2026-02-24 21:00:10,253 - INFO - Audio Analysis: Quality=62%, Language=tanglish(85%), Length=327 chars, Words=62
+2026-02-24 21:00:10,254 - INFO - Routing Decision: quality=62%, words=62, confidence=92%, language=tanglish
+2026-02-24 21:00:10,254 - INFO - [UNCERTAIN] ENSEMBLE: Borderline input → Using Groq + Rules (voting)
+2026-02-24 21:00:10,254 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-24 21:00:10,254 - INFO - Full cleaned transcript for extraction (327 chars): They think i'm a monster. i'll give them what they deserve. they think i'm a monster. i'll give them what they deserve. they think i'm a monster. they think i'm a monster. they think i'm a monster. they think i'm a monster. they think i'm a monster. they think i'm a monster. they think i'm a monster. they think i'm a monster....
+2026-02-24 21:00:10,254 - INFO - Running advanced extraction on 327 chars...
+2026-02-24 21:00:10,255 - INFO - Transcript begins: They think i'm a monster. i'll give them what they deserve. they think i'm a monster. i'll give them what they deserve. they think i'm a monster. they...
+2026-02-24 21:00:10,255 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-24 21:00:12,633 - INFO - [OK] Groq extraction: 0 medicines, 0 diagnoses
+2026-02-24 21:00:12,633 - INFO - Pre-improvement: medicines=0, diagnosis=0
+2026-02-24 21:00:12,652 - INFO - Post-improvement: medicines=0, diagnosis=0
+2026-02-24 21:00:12,653 - INFO - Validation: [OK] PASSED (0 errors, 3 warnings)
