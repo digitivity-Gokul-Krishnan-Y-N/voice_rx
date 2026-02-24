@@ -561,50 +561,51 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
         
         dose_lower = dose_str.lower()
         
-        # Dosage form → route mapping
-        form_to_route = {
-            # Oral forms
-            r'(?:tablet|capsule|pill|caplet|dragee|lozenge|pastille|troche)': 'oral',
-            r'(?:syrup|solution|suspension|elixir|tincture)': 'oral',
-            r'(?:liquid|drink|potion)': 'oral',
-            r'(?:powder|granule)': 'oral',
+        # Dosage form → route mapping (ORDER MATTERS - more specific patterns first!)
+        form_to_route = [
+            # Highly specific forms first (more specific patterns first!)
+            (r'eye\s+drop', 'ophthalmic'),
+            (r'eye\s+ointment', 'ophthalmic'),
+            (r'ophthalmic\s+solution', 'ophthalmic'),
+            (r'ear\s+drop', 'otic'),
+            (r'ear\s+solution', 'otic'),
+            (r'nasal\s+spray', 'nasal'),
+            (r'nasal\s+drop', 'nasal'),
+            (r'nasal\s+mist', 'nasal'),
+            (r'nasal\s+rinse', 'nasal'),
             
-            # Nasal forms
-            r'(?:nasal\s+)?spray': 'nasal',
-            r'(?:nasal\s+)?drop': 'nasal',
-            r'(?:nasal\s+)?mist': 'nasal',
-            r'(?:nasal\s+)?rinse': 'nasal',
+            # Generic oral forms
+            (r'(?:tablet|capsule|pill|caplet|dragee|lozenge|pastille|troche)', 'oral'),
+            (r'(?:syrup|solution|suspension|elixir|tincture)', 'oral'),
+            (r'(?:liquid|drink|potion)', 'oral'),
+            (r'(?:powder|granule)', 'oral'),
+            
+            # Generic nasal forms (less specific)
+            (r'spray', 'nasal'),
+            (r'drop', 'nasal'),
+            (r'mist', 'nasal'),
             
             # Topical forms
-            r'(?:cream|ointment|balm|lotion|gel|liniment|embrocation)': 'topical',
-            r'(?:patch|tape)': 'topical',
-            r'(?:paste|salve)': 'topical',
-            
-            # Ophthalmic (eye) forms
-            r'(?:eye\s+)?drop': 'ophthalmic',
-            r'(?:eye\s+)?ointment': 'ophthalmic',
-            r'(?:ophthalmic\s+)?solution': 'ophthalmic',
-            
-            # Otic (ear) forms
-            r'(?:ear\s+)?drop': 'otic',
-            r'(?:ear\s+)?solution': 'otic',
+            (r'(?:cream|ointment|balm|lotion|gel|liniment|embrocation)', 'topical'),
+            (r'(?:patch|tape)', 'topical'),
+            (r'(?:paste|salve)', 'topical'),
             
             # Inhaled forms
-            r'(?:inhaler|aerosol|inhalation|MDI)': 'inhaled',
+            (r'(?:inhaler|aerosol|inhalation|MDI)', 'inhaled'),
             
             # Parenteral forms
-            r'(?:injection|injectable|ampule|vial)': 'parenteral',
-            r'(?:intramuscular|IM|intravenous|IV)': 'parenteral',
+            (r'(?:injection|injectable|ampule|vial)', 'parenteral'),
+            (r'(?:intramuscular|IM|intravenous|IV)', 'parenteral'),
             
             # Rectal forms
-            r'(?:suppository|enema)': 'rectal',
+            (r'(?:suppository|enema)', 'rectal'),
             
             # Sublingual forms
-            r'(?:sublingual|tablet)': 'sublingual',  # Context-dependent, but if explicitly sublingual
-        }
+            (r'sublingual', 'sublingual'),
+        ]
         
-        # Check each pattern in order of priority (more specific first)
-        for form_pattern, route in form_to_route.items():
+        # Check each pattern in order of specificity (first match wins!)
+        for form_pattern, route in form_to_route:
             if re.search(form_pattern, dose_lower, re.IGNORECASE):
                 logger.debug(f"[ROUTE] Inferred route '{route}' from dosage form: {dose_str}")
                 return route
