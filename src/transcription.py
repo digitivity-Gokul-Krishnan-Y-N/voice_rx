@@ -402,7 +402,7 @@ class WhisperTranscriber:
         if whisper_lang:  # None means no language hint (auto)
             kwargs["language"] = whisper_lang
 
-        # For Tamil & Arabic: request translation to English
+        # For Tamil: request translation to English (Tamil → English is needed)
         if detected_lang == "ta":
             try:
                 with open(audio_path, "rb") as audio_file:
@@ -422,23 +422,12 @@ class WhisperTranscriber:
                 # Fall through to standard transcription below
                 kwargs["language"] = "ta"
         
-        # For Arabic: also use translation mode to convert Arabic → English
+        # For Arabic: Use TRANSCRIPTION (not translation) - Groq understands Arabic well
+        # Translation step was harmful, causing 'pulmonary' instead of 'sinusitis'
         elif detected_lang == "ar":
-            try:
-                with open(audio_path, "rb") as audio_file:
-                    response = self.client.audio.translations.create(
-                        file=audio_file,
-                        model="whisper-1",
-                        prompt="Medical consultation. Patient names, drug names, dosages, diagnosis, medicines.",
-                    )
-                text = response.text.strip()
-                text = self._strip_prompt_echo(text)
-                logger.info(f"[WHISPER] Arabic → English translation: {len(text)} chars")
-                return text
-            except Exception as e:
-                logger.warning(f"[WHISPER] Arabic translation failed: {e} — falling back to transcription")
-                # Fall through to standard transcription with Arabic language hint
-                kwargs["language"] = "ar"
+            kwargs["language"] = "ar"
+            logger.info(f"[WHISPER] Arabic transcription (native): using 'ar' language code")
+            # Continue to standard transcription below with Arabic language hint
 
         # Standard transcription (English / Thanglish)
         with open(audio_path, "rb") as audio_file:

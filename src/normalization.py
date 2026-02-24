@@ -202,11 +202,60 @@ class TranscriptNormalizer:
             logger.info("[NORMALIZE] No normalization needed")
 
         return result, metadata
-
-    @staticmethod
-    def _remove_duplicate_words(text: str) -> str:
-        """Remove consecutive duplicate words"""
-        words = text.split()
+    
+    def validate_medical_semantics(self, text: str) -> Tuple[str, Dict[str, Any]]:
+        """
+        FIX 2: Validate medical vocabulary consistency.
+        Detect and correct anatomically impossible substitutions (e.g., 'pulmonary' in sinusitis context).
+        """
+        result = text.lower()
+        changes = []
+        
+        # Medical context-based corrections
+        # If sinusitis/nasal context detected but wrong organ mentioned → correct it
+        nasal_keywords = ['sinus', 'nasal', 'nose', 'nostril', 'septum', 'turbinate', 'concha']
+        wrong_organ_keywords = {
+            'pulmonary': 'nasal',           # pulmonary artery/vein shouldn't appear in sinusitis
+            'cardiac': 'nasal',
+            'renal': 'nasal',
+            'gastric': 'nasal',
+        }
+        
+        throat_keywords = ['throat', 'pharynx', 'larynx', 'tonsil', 'uvula']
+        
+        # Check if this is a nasal/sinus condition
+        nasal_context = any(keyword in result for keyword in nasal_keywords)
+        throat_context = any(keyword in result for keyword in throat_keywords)
+        
+        if nasal_context:
+            for wrong_word, correct_word in wrong_organ_keywords.items():
+                if wrong_word in result:
+                    # Additional check: if it appears with nasal-adjacent words, fix it
+                    pattern = rf'.*(?:{"|".join(nasal_keywords)}).*{wrong_word}|{wrong_word}.*(?:{"|".join(nasal_keywords)})'
+                    if re.search(pattern, result, re.IGNORECASE):
+                        result = re.sub(rf'\b{wrong_word}\b', correct_word, result, flags=re.IGNORECASE)
+                        changes.append(f"Fixed anatomical inconsistency: '{wrong_word}' → '{correct_word}' (nasal context)")
+        
+        # Medical vocabulary database for validation
+        valid_medical_terms = {
+            'sinusitis', 'pharyngitis', 'laryngitis', 'bronchitis', 'pneumonia',
+            'gastritis', 'enteritis', 'otitis', 'rhinitis', 'conjunctivitis',
+            'urinalysis', 'cbc', 'bloodwork', 'xray', 'ultrasound', 'ct',
+            'fever', 'cough', 'sore throat', 'congestion', 'discharge',
+            'antibiotic', 'paracetamol', 'ibuprofen', 'levocetirizine', 'amoxicillin',
+        }
+        
+        metadata = {
+            'steps': changes,
+            'validity': 'medical_semantics_validated'
+        }
+        
+        if changes:
+            logger.info(f"[SEMANTIC] Medical vocabulary validated: {len(changes)} corrections")
+            for change in changes:
+                logger.debug(f"  - {change}")
+        
+        return result, metadata
         deduped = []
 
         for word in words:

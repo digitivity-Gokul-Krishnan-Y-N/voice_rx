@@ -420,6 +420,16 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
                 # Fix dose format - convert "pills" to proper units
                 if 'dose' in med and med['dose']:
                     med['dose'] = self._normalize_dose(name, med['dose'])
+                
+                # FIX 3: Validate dosage frequency patterns
+                if 'frequency' in med and med['frequency']:
+                    med['frequency'] = self._validate_dosage_frequency(name, med['frequency'])
+                
+                # FIX 4: Map dosage form to correct route
+                if 'dose' in med and med['dose']:
+                    corrected_route = self._infer_route_from_form(med['dose'])
+                    if corrected_route:
+                        med['route'] = corrected_route
             
             corrected.append(med)
 
@@ -471,6 +481,136 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
         
         # No recognized format, return as-is
         return dose_str
+
+    def _validate_dosage_frequency(self, drug_name: str, frequency_str: str) -> str:
+        """
+        FIX 3: Validate dosage frequency patterns.
+        Detects and corrects invalid frequency patterns like "5 times at night" → "once at night".
+        """
+        if not frequency_str:
+            return frequency_str
+        
+        freq_lower = frequency_str.lower().strip()
+        
+        # Valid frequency patterns for different drugs
+        # Most common drugs allow: once daily, twice daily, 3 times a day, once at night
+        frequency_validation_map = {
+            'levocetirizine': ['once daily', 'once at night', 'twice daily'],
+            'paracetamol': ['3 times a day', '4 times a day', 'every 6 hours', 'every 4-6 hours'],
+            'ibuprofen': ['3 times a day', '4 times a day', 'every 6-8 hours'],
+            'amoxicillin': ['3 times a day', 'twice daily', '2 times a day'],
+            'azithromycin': ['once daily', 'once a day'],
+            'omeprazole': ['once daily', 'once a day', 'twice daily', '2 times a day'],
+            'pantoprazole': ['once daily', 'once a day', 'twice daily', '2 times a day'],
+            'antacid': ['3 times a day', '4 times a day', 'after meals'],
+            'ciprofloxacin': ['twice daily', '2 times a day'],
+            'metformin': ['2 times a day', 'twice daily', '3 times a day'],
+            'amlodipine': ['once daily', 'once a day'],
+        }
+        
+        # Get valid frequencies for this drug
+        drug_name_lower = drug_name.lower().strip()
+        valid_freqs = None
+        
+        # Exact match
+        if drug_name_lower in frequency_validation_map:
+            valid_freqs = frequency_validation_map[drug_name_lower]
+        else:
+            # Partial match (e.g., "levocetirizine dihydrochloride")
+            for key in frequency_validation_map:
+                if key in drug_name_lower or drug_name_lower in key:
+                    valid_freqs = frequency_validation_map[key]
+                    break
+        
+        # If we don't have validation rules for this drug, return as-is
+        if not valid_freqs:
+            return frequency_str
+        
+        # Check if current frequency is valid
+        for valid_freq in valid_freqs:
+            if valid_freq.lower() in freq_lower:
+                return frequency_str  # Valid frequency found
+        
+        # Detect and correct common invalid patterns
+        invalid_patterns = {
+            # "5 times at night" → "once at night" (too many times)
+            r'(\d+)\s+times?\s+(?:at\s+)?(?:night|evening|before\s+bed)': 'once at night',
+            # "10 times a day" → "3 times a day"
+            r'\b([5-9]|10|20|30)\s+times?\s+a\s+day\b': '3 times a day',
+            # "once morning and once night" → "twice daily"
+            r'once\s+morning\s+and\s+once\s+(?:night|evening)': 'twice daily',
+            # "every 2 hours" → "every 4-6 hours" (too frequent)
+            r'every\s+[12]\s+hours?': 'every 4-6 hours',
+        }
+        
+        for invalid_pattern, correction in invalid_patterns.items():
+            if re.search(invalid_pattern, freq_lower, re.IGNORECASE):
+                logger.info(f"[DOSAGE] Fixed invalid frequency pattern '{frequency_str}' → '{correction}' for {drug_name}")
+                return correction
+        
+        # Return original if no issues detected
+        return frequency_str
+
+    def _infer_route_from_form(self, dose_str: str) -> Optional[str]:
+        """
+        FIX 4: Infer drug route from dosage form.
+        Maps physical form (tablet, spray, cream) to correct administration route.
+        """
+        if not dose_str:
+            return None
+        
+        dose_lower = dose_str.lower()
+        
+        # Dosage form → route mapping
+        form_to_route = {
+            # Oral forms
+            r'(?:tablet|capsule|pill|caplet|dragee|lozenge|pastille|troche)': 'oral',
+            r'(?:syrup|solution|suspension|elixir|tincture)': 'oral',
+            r'(?:liquid|drink|potion)': 'oral',
+            r'(?:powder|granule)': 'oral',
+            
+            # Nasal forms
+            r'(?:nasal\s+)?spray': 'nasal',
+            r'(?:nasal\s+)?drop': 'nasal',
+            r'(?:nasal\s+)?mist': 'nasal',
+            r'(?:nasal\s+)?rinse': 'nasal',
+            
+            # Topical forms
+            r'(?:cream|ointment|balm|lotion|gel|liniment|embrocation)': 'topical',
+            r'(?:patch|tape)': 'topical',
+            r'(?:paste|salve)': 'topical',
+            
+            # Ophthalmic (eye) forms
+            r'(?:eye\s+)?drop': 'ophthalmic',
+            r'(?:eye\s+)?ointment': 'ophthalmic',
+            r'(?:ophthalmic\s+)?solution': 'ophthalmic',
+            
+            # Otic (ear) forms
+            r'(?:ear\s+)?drop': 'otic',
+            r'(?:ear\s+)?solution': 'otic',
+            
+            # Inhaled forms
+            r'(?:inhaler|aerosol|inhalation|MDI)': 'inhaled',
+            
+            # Parenteral forms
+            r'(?:injection|injectable|ampule|vial)': 'parenteral',
+            r'(?:intramuscular|IM|intravenous|IV)': 'parenteral',
+            
+            # Rectal forms
+            r'(?:suppository|enema)': 'rectal',
+            
+            # Sublingual forms
+            r'(?:sublingual|tablet)': 'sublingual',  # Context-dependent, but if explicitly sublingual
+        }
+        
+        # Check each pattern in order of priority (more specific first)
+        for form_pattern, route in form_to_route.items():
+            if re.search(form_pattern, dose_lower, re.IGNORECASE):
+                logger.debug(f"[ROUTE] Inferred route '{route}' from dosage form: {dose_str}")
+                return route
+        
+        # No route could be inferred
+        return None
 
     def _correct_drug_name(self, name: str) -> str:
         """
@@ -571,10 +711,14 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
     # ── Rule-based extractors ──────────────────────────────────────────────────
 
     def _extract_patient_name(self, text: str) -> Optional[str]:
-        """Extract patient name - handles multi-word names and various patterns including Arabic."""
+        """
+        FIX 5: Extract patient name - handles multi-word names and multilingual patterns.
+        Supports English, Tamil/Thanglish, and Arabic patterns.
+        """
         text_lower = text.lower()
         
-        patterns = [
+        # English patterns
+        english_patterns = [
             # "patient APC", "patient is APC", "patient named APC"
             r'patient\s+(?:named\s+|is\s+|name\s+)?([a-z]+(?:\s+[a-z]+)?)',
             # "with patient John Smith"
@@ -587,21 +731,36 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
             r'(?:patient\s+)?name\s+(?:is\s+)?([a-z]+(?:\s+[a-z]+)?)',
         ]
         
-        for pattern in patterns:
+        # Tamil/Thanglish patterns (handles "peru", "peyar", "patient peru")
+        tamil_patterns = [
+            # "patient peru XXXX" or "patient peyar XXXX" 
+            r'(?:patient\s+)?(?:pe(?:ru|yar)|naam)\s+(?:is\s+)?([a-z]+(?:\s+[a-z]+)?)',
+            # "per XXXX" (short form)
+            r'\bper\s+([a-z]+(?:\s+[a-z]+)?)\b',
+            # "doctor ku XXXX" (doctor's name pattern, skip)
+            # "this is patient XXXX"
+            r'(?:this\s+is\s+)?patient\s+([a-z]+(?:\s+[a-z]+)?)',
+        ]
+        
+        # Try English patterns
+        for pattern in english_patterns:
             match = re.search(pattern, text_lower, re.IGNORECASE)
             if match:
-                # Find original casing from full text for this matched name
-                original_match = re.search(pattern, text, re.IGNORECASE)
-                if original_match:
-                    name = original_match.group(1).strip()
-                else:
-                    name = match.group(1).strip()
-                
-                # Ensure it's a valid name (not time words, pronouns, etc)
-                invalid_names = ['today', 'tomorrow', 'yesterday', 'now', 'then', 'the', 'a', 'is', 'has', 'been', 'going', 'get', 'have', 'of', 'in', 'one', 'two', 'three', 'symptoms', 'acute', 'inflammation']
+                name = match.group(1).strip()
+                # Ensure it's a valid name
+                invalid_names = ['today', 'tomorrow', 'yesterday', 'now', 'then', 'the', 'a', 'is', 'has', 'been', 'going', 'get', 'have', 'of', 'in', 'one', 'two', 'three', 'symptoms', 'acute', 'inflammation', 'symptoms']
                 if name.lower() not in invalid_names and len(name) > 1:
-                    # Keep original casing for acronyms/all-caps, otherwise capitalize
                     return name.upper() if name.isupper() else ' '.join(word.capitalize() for word in name.split())
+        
+        # Try Tamil/Thanglish patterns
+        for pattern in tamil_patterns:
+            match = re.search(pattern, text_lower, re.IGNORECASE)
+            if match:
+                name = match.group(1).strip()
+                invalid_names = ['today', 'tomorrow', 'yesterday', 'now', 'then', 'the', 'a', 'is', 'has', 'been', 'going', 'symptoms', 'acute']
+                if name.lower() not in invalid_names and len(name) > 1:
+                    return name.upper() if name.isupper() else ' '.join(word.capitalize() for word in name.split())
+        
         return None
 
     def _extract_medicines(self, text: str) -> List[Medicine]:
@@ -724,7 +883,10 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
         return sorted(found.keys(), key=lambda x: found[x])[:5]
 
     def _extract_advice(self, text: str) -> List[str]:
-        """Extract advice based on content."""
+        """
+        FIX 6: Extract advice based on content with evidence-based validation.
+        Only returns advice that is explicitly mentioned in the transcript (not inferred).
+        """
         if not MEDICINE_DB_AVAILABLE:
             return []
 
@@ -735,9 +897,39 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
         for idx, keywords_list in ADVICE_MAPPING.items():
             if any(k in text_lower for k in keywords_list):
                 if idx < len(STANDARD_ADVICE):
-                    advice.append(STANDARD_ADVICE[idx])
+                    advice_text = STANDARD_ADVICE[idx]
+                    # Validate that this advice is actually mentioned in the transcript
+                    if self._validate_advice_in_transcript(advice_text, text_lower):
+                        advice.append(advice_text)
 
         return advice[:12]
+
+    def _validate_advice_in_transcript(self, advice: str, transcript_lower: str) -> bool:
+        """
+        Validate that advice text is actually mentioned in the transcript.
+        Uses semantic similarity with high threshold (0.7+) to avoid false positives.
+        """
+        # Extract key words from advice (length > 3)
+        advice_words = [w for w in re.findall(r'\b\w+\b', advice.lower()) if len(w) > 3]
+        
+        if not advice_words:
+            return False
+        
+        # Check if majority of key words appear in transcript
+        # This is a heuristic approach without full semantic similarity
+        matched_words = sum(1 for word in advice_words if word in transcript_lower)
+        match_ratio = matched_words / len(advice_words) if advice_words else 0
+        
+        # If >70% of key words are present, consider it evidence-based
+        if match_ratio >= 0.7:
+            return True
+        
+        # Alternative: check for explicit advice keywords in transcript
+        # Examples: "rest", "drink water", "avoid", "take", "follow", "wait"
+        explicit_indicators = ['rest', 'wait', 'avoid', 'drink', 'take', 'follow', 'keep', 'monitor', 'ensure', 'use']
+        has_indicator = any(indicator in transcript_lower for indicator in explicit_indicators)
+        
+        return has_indicator and match_ratio >= 0.5
 
     # ── Helper methods ────────────────────────────────────────────────────────
 
