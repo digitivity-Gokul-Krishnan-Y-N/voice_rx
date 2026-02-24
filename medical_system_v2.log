@@ -510,3 +510,25 @@
 2026-02-24 20:25:19,291 - INFO - Pre-improvement: medicines=4, diagnosis=2
 2026-02-24 20:25:19,291 - INFO - Post-improvement: medicines=4, diagnosis=2
 2026-02-24 20:25:19,291 - INFO - Validation: [OK] PASSED (0 errors, 4 warnings)
+2026-02-24 20:53:37,495 - INFO - 
+================================================================================
+2026-02-24 20:53:37,498 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-24 20:53:37,499 - INFO - ================================================================================
+2026-02-24 20:53:37,922 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-24 20:53:37,922 - INFO - Groq API key detected
+2026-02-24 20:53:37,932 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 20:53:41,446 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 20:53:41,446 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 20:53:41,446 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-24 20:53:41,447 - INFO - [OK] System ready with advanced extraction
+
+2026-02-24 20:53:41,447 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-24 20:54:00,810 - INFO - [DETECT] Whisper detected language: 'arabic'
+2026-02-24 20:54:00,810 - INFO - [DETECT] Probe text sample: تعاني من أعراض تشير إلى اتهاب الجيوب الأنفية الحاد اتهاب وتورم في الممرات الأنفية والجيوب الأنفية يح
+2026-02-24 20:54:00,810 - INFO - [DETECT] Whisper detected 'arabic' → mapped to 'ar'
+2026-02-24 20:54:00,810 - INFO - [WHISPER] Transcribing as 'ar' (whisper_lang='ar')
+2026-02-24 20:54:00,810 - INFO - [WHISPER] Arabic transcription (native): using 'ar' language code
+2026-02-24 20:54:20,679 - INFO - [WHISPER] Raw transcript (1176 chars): تعاني من أعراض تشير إلى اتهاب الجيوب الأنفية الحاد. اتهاب وتورم في الممرات الأنفية والجيوب الأنفية. يحدث غالبا بعد نزلات...
+2026-02-24 20:54:20,679 - WARNING - [QUALITY] No medical keywords detected
+2026-02-24 20:54:20,679 - INFO - [OK] Transcribed (1176 chars, 209 words) [lang=ar]
+2026-02-24 20:54:20,696 - INFO - [EN] English detected (default)

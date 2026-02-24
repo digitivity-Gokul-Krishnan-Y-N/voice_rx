@@ -256,6 +256,11 @@ class TranscriptNormalizer:
                 logger.debug(f"  - {change}")
         
         return result, metadata
+
+    @staticmethod
+    def _remove_duplicate_words(text: str) -> str:
+        """Remove consecutive duplicate words"""
+        words = text.split()
         deduped = []
 
         for word in words:
