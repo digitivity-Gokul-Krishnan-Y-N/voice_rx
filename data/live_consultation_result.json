@@ -1,14 +1,66 @@
 {
   "success": true,
   "patient_name": null,
-  "complaints": [],
-  "diagnosis": [],
-  "medicines": [],
+  "complaints": [
+    "burning urination",
+    "frequent urination",
+    "lower abdominal pain"
+  ],
+  "diagnosis": [
+    "urinary tract infection"
+  ],
+  "medicines": [
+    {
+      "name": "stayhappi nitrofurantoin tablet",
+      "dose": "100 mg",
+      "frequency": "2 times a day",
+      "duration": "5 days",
+      "instruction": "after food",
+      "route": "oral",
+      "side_effects": []
+    },
+    {
+      "name": "paracetamol",
+      "dose": "500 mg",
+      "frequency": "as needed",
+      "duration": null,
+      "instruction": "as needed",
+      "route": "oral",
+      "side_effects": []
+    },
+    {
+      "name": "lopassium tablet",
+      "dose": null,
+      "frequency": "2 times a day",
+      "duration": null,
+      "instruction": "dissolved in water",
+      "route": "oral",
+      "side_effects": []
+    },
+    {
+      "name": "ciprobiotic tablet",
+      "dose": "1 mg",
+      "frequency": "once a day",
+      "duration": null,
+      "instruction": "after food",
+      "route": "oral",
+      "side_effects": []
+    },
+    {
+      "name": "vitamin-c",
+      "dose": "1 mg",
+      "frequency": "once a day",
+      "duration": null,
+      "instruction": "to support immunity",
+      "route": "oral",
+      "side_effects": []
+    }
+  ],
   "tests": [],
   "advice": [],
-  "language": "tanglish",
-  "confidence": 0.6239247311827957,
+  "language": "ar",
+  "confidence": 0.8643588235294118,
   "extraction_method": "groq",
-  "processing_time_sec": 40.01388,
-  "route": "ensemble"
+  "processing_time_sec": 77.012095,
+  "route": "groq_only"
 }

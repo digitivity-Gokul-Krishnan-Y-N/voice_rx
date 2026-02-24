@@ -568,3 +568,38 @@
 2026-02-24 21:00:12,633 - INFO - Pre-improvement: medicines=0, diagnosis=0
 2026-02-24 21:00:12,652 - INFO - Post-improvement: medicines=0, diagnosis=0
 2026-02-24 21:00:12,653 - INFO - Validation: [OK] PASSED (0 errors, 3 warnings)
+2026-02-24 21:03:23,454 - INFO - 
+================================================================================
+2026-02-24 21:03:23,454 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-24 21:03:23,454 - INFO - ================================================================================
+2026-02-24 21:03:23,773 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-24 21:03:23,773 - INFO - Groq API key detected
+2026-02-24 21:03:23,787 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 21:03:27,842 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 21:03:27,842 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 21:03:27,842 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-24 21:03:27,842 - INFO - [OK] System ready with advanced extraction
+
+2026-02-24 21:03:27,842 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-24 21:03:57,016 - INFO - [DETECT] Whisper detected language: 'arabic'
+2026-02-24 21:03:57,016 - INFO - [DETECT] Probe text sample: تعانينا من أعراض تشير إلى اتهاب المسالك البولية UTI وهو اتهاب يصيب الجهاز البولي وغالبا يسبب حرقا أث
+2026-02-24 21:03:57,016 - INFO - [DETECT] Whisper detected 'arabic' → mapped to 'ar'
+2026-02-24 21:03:57,016 - INFO - [WHISPER] Transcribing as 'ar' (whisper_lang='ar')
+2026-02-24 21:03:57,016 - INFO - [WHISPER] Arabic transcription (native): using 'ar' language code
+2026-02-24 21:04:33,420 - INFO - [WHISPER] Raw transcript (1041 chars): تعانينا من أعراض تشير إلى اتهاب المسالك البولية. UTI وهو اتهاب يصيب الجهاز البولي وغالبا يسبب حرق أثناء التبول. تكرار ال...
+2026-02-24 21:04:33,427 - WARNING - [QUALITY] No medical keywords detected
+2026-02-24 21:04:33,427 - INFO - [OK] Transcribed (1041 chars, 175 words) [lang=ar]
+2026-02-24 21:04:33,436 - INFO - [EN] English detected (default)
+2026-02-24 21:04:33,446 - INFO - [NORMALIZE] No normalization needed
+2026-02-24 21:04:33,448 - INFO - Audio Analysis: Quality=86%, Language=ar(95%), Length=1041 chars, Words=175
+2026-02-24 21:04:33,448 - INFO - Routing Decision: quality=86%, words=175, confidence=92%, language=ar
+2026-02-24 21:04:33,448 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-24 21:04:33,448 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-24 21:04:33,449 - INFO - Full cleaned transcript for extraction (1041 chars): تعانينا من أعراض تشير إلى اتهاب المسالك البولية. uti وهو اتهاب يصيب الجهاز البولي وغالبا يسبب حرق أثناء التبول. تكرار الحاجة للتبول وألم أسفل البطن. الهدف من العلاج هو القضاء على العدوى وتخفيف الأعراض ومنع المضاعفات. تناول نيترو فورانتوين 100 ملغة مرتين يوميا بعد الطعام لمدة 5 أيام. يجب إكمال مدة العلاج كاملة حتى لو تحسنت الأعراض. تناول بارستامول 500 ملغة عند الحاجة لتخفيف الألم أو الحرارة حسب الجرعة الموصبها. تناول فوار سطرات البوتسيوم مذابا في الماء مرتين يوميا لتقليل حرقة البول. تناول كبسولة بروبيوتيك مرة يوميا بعد الطعام لدعم صحة الجهاز الهضمي أثناء العلاج. يمكن تناول مكمل فيتامين سي مرة يوميا لدعم المناعة. أشرب كمية كبيرة من الماء يوميا للمساعدة في تنظيف المسالك البولية. لا تؤخر التبول عند الشعور بالحاجة. تجنبي المشروبات الغازية والكافيين والأطعمة الحارة مؤقتا. حافظ على النظافة الشخصية الجيدة. قد تظهر آثار جانبية خفيفة مثل الغذيان أو الطراب المعدة. إذا ظهرت حمى شديدة، ألم قوي في الظهر، دم في البول، قيء مستمر أو لم تتحسن الأعراض خلال ثلاثة أيام، يجب مراجعة الطبيب فورا. نتمكن من الش...
+2026-02-24 21:04:33,449 - INFO - Running advanced extraction on 1041 chars...
+2026-02-24 21:04:33,449 - INFO - Transcript begins: تعانينا من أعراض تشير إلى اتهاب المسالك البولية. uti وهو اتهاب يصيب الجهاز البولي وغالبا يسبب حرق أثناء التبول. تكرار الحاجة للتبول وألم أسفل البطن. ا...
+2026-02-24 21:04:33,450 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-24 21:04:44,836 - INFO - [OK] Groq extraction: 5 medicines, 1 diagnoses
+2026-02-24 21:04:44,836 - INFO - Pre-improvement: medicines=5, diagnosis=1
+2026-02-24 21:04:44,836 - INFO - Post-improvement: medicines=5, diagnosis=1
+2026-02-24 21:04:44,836 - INFO - Validation: [OK] PASSED (0 errors, 2 warnings)

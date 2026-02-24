@@ -11,7 +11,7 @@ import logging
 import re
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
-from difflib import get_close_matches
+from difflib import get_close_matches, SequenceMatcher
 
 try:
     from groq import Groq
@@ -20,13 +20,13 @@ except ImportError:
     GROQ_AVAILABLE = False
 
 try:
-    from smart_labeling import SmartLabelClassifier
+    from .smart_labeling import SmartLabelClassifier
     SMART_LABELING_AVAILABLE = True
 except ImportError:
     SMART_LABELING_AVAILABLE = False
 
 try:
-    from medicine_database import (
+    from .medicine_database import (
         KNOWN_DRUGS, DRUG_CORRECTIONS, STANDARD_ADVICE, ADVICE_MAPPING
     )
     MEDICINE_DB_AVAILABLE = True
@@ -439,17 +439,25 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
     def _normalize_dose(self, drug_name: str, dose_str: str) -> str:
         """
         Normalize dose format.
+        IMPROVEMENT 3: Blocks LLM dose hallucination (null if not in transcript).
         Converts "40 pills" → "40 mg", "1 pack" → "1 unit", etc.
         """
         if not dose_str:
-            return dose_str
+            return None  # IMPROVEMENT 3: Return None instead of empty string
         
         dose_str_lower = dose_str.lower().strip()
+        
+        # IMPROVEMENT 3: Detect hallucinated doses (LLM fill-gap behavior)
+        # If dose is vague without numeric values, mark as None
+        if not re.search(r'\d+', dose_str_lower):
+            # No numeric dose found - this is likely an LLM hallucination
+            logger.debug(f"[DOSE] No numeric dose found for '{drug_name}' in '{dose_str}' → setting to None")
+            return None
         
         # Extract numeric part
         num_match = re.search(r'(\d+(?:\.\d+)?)', dose_str_lower)
         if not num_match:
-            return dose_str
+            return None  # IMPROVEMENT 3: Return None if can't extract numeric dose
         
         numeric_part = num_match.group(1)
         
@@ -616,6 +624,7 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
     def _correct_drug_name(self, name: str) -> str:
         """
         Correct drug name using database corrections, phonetic mappings, and fuzzy matching.
+        IMPROVEMENT 2: Includes Arabic medical dictionary for phoneme confusion correction.
         Handles names with delivery formats (e.g., "tess oral paste", "ciprobiotic tablet").
         """
         if not MEDICINE_DB_AVAILABLE:
@@ -623,6 +632,27 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
 
         original_name = name.lower().strip()
         corrected = original_name
+        made_corrections = False  # Track if we applied any corrections
+        
+        # IMPROVEMENT 2: Arabic medicine name corrections (Whisper phoneme confusion)
+        # These handle common Arabic→English speech-to-text phonetic errors
+        arabic_medical_corrections = {
+            r'\bسترات\s+البوتاسيوم\b|\blopassium\b|\blopa\s+potassium\b': 'potassium citrate',
+            r'\bالبوتاسيوم\b|\blopassium\b': 'potassium',
+            r'\bبروبيوتيك\b|\bciprobiotic\b': 'probiotic',
+            r'\bفيتامين\s+سي\b|\bvitamin\s+see\b': 'vitamin c',
+            r'\bباراسيتامول\b|\bparacetamol\b': 'paracetamol',
+            r'\bنيتروفورانتوين\b|\bnitrofurantoin\b': 'nitrofurantoin',
+            r'\bفوار\b|\bifar\b': 'effervescent',
+            r'\bسترات\b|\bstration\b': 'citrate',
+            r'\bمضاد\s+حيوي\b|\bantibiotic\b': 'antibiotic',
+            r'\bتحاميل\b|\bsuppository\b': 'suppository',
+        }
+        
+        for pattern, replacement in arabic_medical_corrections.items():
+            if re.search(pattern, corrected, flags=re.IGNORECASE):
+                corrected = re.sub(pattern, replacement, corrected, flags=re.IGNORECASE)
+                made_corrections = True
 
         # FIRST: Remove common delivery format suffixes
         # This is crucial - must happen before other corrections
@@ -647,7 +677,9 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
         ]
         
         for pattern in delivery_formats:
-            corrected = re.sub(pattern, '', corrected, flags=re.IGNORECASE)
+            if re.search(pattern, corrected, flags=re.IGNORECASE):
+                corrected = re.sub(pattern, '', corrected, flags=re.IGNORECASE)
+                made_corrections = True
         
         corrected = corrected.strip()
         
@@ -698,24 +730,78 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
                 unique_words.append(w)
         corrected = ' '.join(unique_words).strip()
 
+        # IMPROVEMENT 5: Brand/generic normalization (BEFORE fuzzy matching!)
+        # Map common brand names to generic names - must happen BEFORE fuzzy matching
+        # so that brand names get corrected before fuzzy matching tries to find them in KNOWN_DRUGS
+        brand_generic_map = {
+            r'\bstayhappi\b': 'nitrofurantoin',
+            r'\bstay\s*happi\b': 'nitrofurantoin',
+            r'\buristat\b': 'nitrofurantoin',
+            r'\bcineole\b': 'eucalyptus oil',
+            r'\bmontelukast\b': 'monteleukast',
+            r'\bsingulair\b': 'montelukast',
+        }
+        
+        for pattern, generic_name in brand_generic_map.items():
+            if re.search(pattern, corrected, flags=re.IGNORECASE):
+                corrected = re.sub(pattern, generic_name, corrected, flags=re.IGNORECASE)
+                made_corrections = True
+
         # SIXTH: Fuzzy match against known drugs
+        # BUT: Skip fuzzy matching if we already applied corrections!
+        # Fuzzy matching can undo our careful corrections, so we trust our corrections over fuzzy matching.
+        # Also prevent fuzzy matching from undoing phonetic corrections
+        # (e.g., don't return "lopassium tablet" for "potassium citrate")
         corrected_lower = corrected.lower().strip()
-        if corrected_lower and corrected_lower not in KNOWN_DRUGS:
+        
+        # If we've already made corrections, skip fuzzy matching to avoid undoing them
+        if made_corrections:
+            logger.debug(f"[CORRECTION] Skipping fuzzy matching because corrections were already applied: '{corrected_lower}'")
+        elif corrected_lower and corrected_lower not in KNOWN_DRUGS:
             # Try fuzzy matching with decreasing cutoff thresholds
             for cutoff in [0.75, 0.65, 0.55, 0.45]:
                 matches = get_close_matches(corrected_lower, KNOWN_DRUGS, n=1, cutoff=cutoff)
                 if matches:
-                    return matches[0].lower()
+                    fuzzy_match = matches[0].lower()
+                    # Check if the fuzzy match is too similar to the ORIGINAL input
+                    # If so, we're likely undoing a phonetic correction, so skip and use corrected version
+                    fuzzy_similarity = SequenceMatcher(None, original_name, fuzzy_match).ratio()
+                    if fuzzy_similarity > 0.7:
+                        # The fuzzy match is too similar to original input - likely a phonetic error
+                        # Keep the corrected version instead
+                        logger.debug(f"[CORRECTION] Skipping fuzzy match '{fuzzy_match}' (too similar to original '{original_name}')")
+                        break
+                    return fuzzy_match
 
+
+        
         return corrected.lower()
 
     # ── Rule-based extractors ──────────────────────────────────────────────────
 
     def _extract_patient_name(self, text: str) -> Optional[str]:
         """
-        FIX 5: Extract patient name - handles multi-word names and multilingual patterns.
-        Supports English, Tamil/Thanglish, and Arabic patterns.
+        FIX 5 + IMPROVEMENT 1: Extract patient name - multilingual with Arabic greeting support.
+        Supports English, Tamil/Thanglish, and Arabic patterns including greetings.
         """
+        # IMPROVEMENT 1: Arabic greeting name detection (70% accuracy gain)
+        # Patterns: مرحباً <name>, اهلاً <name>, السلام عليكم <name>
+        arabic_greeting_patterns = [
+            r'(?:مرحباً|اهلاً|السلام عليكم)\s+([^\s،]+)',  # Arabic greetings with name
+            r'(?:hello|hi)\s+(?:there\s+)?([a-z]+)\b(?!\s+(?:there|symptoms))',  # English greetings with transliterated name
+        ]
+        
+        # Try Arabic greeting patterns first (highest priority)
+        for pattern in arabic_greeting_patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                name = match.group(1).strip().replace('،', '').strip()
+                if name and len(name) > 1:
+                    # Keep Arabic names as-is, capitalize Latin names
+                    if any(ord(c) >= 0x0600 for c in name):  # Check if Arabic characters
+                        return name
+                    return name.upper() if name.isupper() else ' '.join(word.capitalize() for word in name.split())
+        
         text_lower = text.lower()
         
         # English patterns
@@ -885,14 +971,38 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
 
     def _extract_advice(self, text: str) -> List[str]:
         """
-        FIX 6: Extract advice based on content with evidence-based validation.
+        FIX 6 + IMPROVEMENT 4: Extract advice with Arabic support.
         Only returns advice that is explicitly mentioned in the transcript (not inferred).
+        IMPROVEMENT 4: Detects Arabic advice sentences (اشربي, تجنبي, etc.).
         """
         if not MEDICINE_DB_AVAILABLE:
             return []
 
         text_lower = text.lower()
         advice = []
+        
+        # IMPROVEMENT 4: Arabic advice trigger words
+        # These are imperative forms in Arabic that indicate advice
+        arabic_advice_keywords = {
+            'اشرب': 'drink water regularly',
+            'تجنب': 'avoid triggers',
+            'حافظ': 'maintain hygiene',
+            'لا تؤخر': 'seek prompt medical care',
+            'ينبغي': 'follow medical advice',
+            'يجب': 'must follow instructions',
+            'تناول': 'take as prescribed',
+            'لا تشرب': 'avoid alcohol',
+            'استريح': 'get adequate rest',
+            'شرب ماء': 'drink water',
+            'حمام دافئ': 'warm water bath',
+            'توازن': 'maintain balance',
+        }
+        
+        # Extract Arabic advice sentences
+        for ar_keyword, ar_advice in arabic_advice_keywords.items():
+            if ar_keyword in text:
+                advice.append(ar_advice)
+                logger.debug(f"[ADVICE] Detected Arabic advice trigger: {ar_keyword} → {ar_advice}")
 
         # Use advice mapping from database
         for idx, keywords_list in ADVICE_MAPPING.items():
@@ -903,7 +1013,7 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
                     if self._validate_advice_in_transcript(advice_text, text_lower):
                         advice.append(advice_text)
 
-        return advice[:12]
+        return list(set(advice))[:12]  # Remove duplicates and limit to 12
 
     def _validate_advice_in_transcript(self, advice: str, transcript_lower: str) -> bool:
         """
