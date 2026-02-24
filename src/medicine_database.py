@@ -60,7 +60,11 @@ def _load_known_drugs():
         'metformin', 'glipizide', 'glyburide', 'sitagliptin', 'insulin',
         
         # Antibacterial Ointments
-        'antibiotic ointment', 'neomycin', 'bacitracin', 'polymyxin'
+        'antibiotic ointment', 'neomycin', 'bacitracin', 'polymyxin',
+        
+        # Arabic transliterated medicines (for speech recognition)
+        'aspireen', 'paracetal', 'amoxysilan', 'azithro', 'ciprofloxacine',
+        'levoceti', 'omeprazol', 'domeperidone', 'levocetirizine',
     }
     
     # Try to load from SQLite database if available

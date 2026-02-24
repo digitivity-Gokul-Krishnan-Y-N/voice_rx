@@ -152,7 +152,7 @@ class AdvancedExtractor:
         return None
 
     def _extract_medicines_advanced(self, text: str) -> List[Dict]:
-        """Extract medicines - handles transcription variations"""
+        """Extract medicines - handles transcription variations and multiple languages"""
         medicines = []
         seen = set()
         text_lower = text.lower()
@@ -160,22 +160,24 @@ class AdvancedExtractor:
         # Correct medical term errors first
         corrected_text = self._correct_medical_terms(text_lower)
         
-        # Multiple patterns to catch various formats
+        # Multiple patterns to catch various formats (English + Thanglish + Arabic transliterated)
         patterns = [
             # "prescribe erythromycin 500 mg 3 times a day for 5 days"
-            r'(?:prescribe|take|give)\s+(?:a\s+)?(?:tablet\s+of\s+)?([a-z]+(?:\s+[a-z]+)?)\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|tablet|capsule|drop|unit|mc|mcd|cd)s?\s+(\d+)\s*(?:times?\s+)?(?:a\s+)?day\s+for\s+(\d+)\s*days?',
+            r'(?:prescribe|take|give|dawa)\s+(?:a\s+)?(?:tablet\s+of\s+)?([a-z]+(?:\s+[a-z]+)?)\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|tablet|capsule|drop|unit|mc|mcd|cd)s?\s+(\d+)\s*(?:times?\s+)?(?:a\s+)?day\s+for\s+(\d+)\s*days?',
             # "Medicine, erythromycin, 500 mg daily 3 times for 5 days"
-            r'(?:medicine|medicines|drug)[,:]?\s*([a-z]+(?:\s+[a-z]+)?)\s*,?\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|tablet|capsule|drop|unit|mc|mcd|cd)s?\s+(?:daily\s+)?(\d+)\s*(?:times?)\s+for\s+(\d+)\s*days?',
+            r'(?:medicine|medicines|drug|dawa)[,:]?\s*([a-z]+(?:\s+[a-z]+)?)\s*,?\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|tablet|capsule|drop|unit|mc|mcd|cd)s?\s+(?:daily\s+)?(\d+)\s*(?:times?)\s+for\s+(\d+)\s*days?',
             # "erythromycin 500 mg three times daily" or similar
             r'(?:^|[,;])\s*([a-z]+(?:\s+[a-z]+)?)\s*,?\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|tablet|capsule|drop|unit|mc|mcd|cd)s?\s+(?:\d+|three|two|four)\s*(?:times?|x)\s+(?:daily|a\s+day)',
             # Simpler pattern: "erythromycin 500 mg" standalone (extract what we can)
-            r'(?:prescription|medicine|take)(?:d)?[,:]?\s*([a-z]+(?:\s+[a-z]+)?)\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|drop|unit)',
+            r'(?:prescription|medicine|take|dawa)(?:d)?[,:]?\s*([a-z]+(?:\s+[a-z]+)?)\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|drop|unit)',
             # Very simple: "Drug X every Y hours" or "Drug X take at night"
             r'([a-z]+(?:\s+[a-z]+)?)\s+(?:(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|drop|unit))?,?\s+(?:every|at|one\s+)?(?:(\d+)\s*(?:hours?|times?\s+daily|times?\s+a\s+day))?',
             # Sprays/Lozenges: "Benzydamine throat spray use 3-4 times daily"
             r'([a-z]+(?:\s+[a-z]+)?)\s+(?:throat\s+)?(?:spray|lozenge|tablet|syrup|supplement)\s+(?:use|take|dissolve)?\s*(\d+(?:-\d+)?)\s*times?\s+(?:daily|a\s+day)',
             # Simple once daily: "Drug X once a day/daily"
             r'([a-z]+(?:\s+[a-z]+)?)\s+(?:take\s+)?(?:once\s+a\s+day|once\s+daily|daily)',
+            # Arabic transliterated patterns: "aspireen" or "paracetamol" (both used in Arabic speech)
+            r'(?:aspireen|paracetamol|amoxicillin|levocetirizine)\s+(\d+)\s*(?:mg|ml)',
         ]
         
         for pattern_idx, pattern in enumerate(patterns):
@@ -211,7 +213,7 @@ class AdvancedExtractor:
                             dose_num = dose_match.group(1)
                     
                     # Skip if it's a verb/non-drug word
-                    if drug_raw in ['prescribe', 'take', 'give', 'tablet', 'medicine', 'drug', 'medicines', 'prescription', 'every', 'one', 'at']:
+                    if drug_raw in ['prescribe', 'take', 'give', 'tablet', 'medicine', 'drug', 'medicines', 'prescription', 'every', 'one', 'at', 'dawa']:
                         continue
                     
                     # Get just the first word (primary drug name)
@@ -225,15 +227,15 @@ class AdvancedExtractor:
                     if len(groups) >= 3 and groups[2]:
                         freq_num = groups[2]
                     else:
-                        freq_match = re.search(r'(\d+)\s*(?:times?|x|hours?)', match.group(0), re.IGNORECASE)
+                        freq_match = re.search(r'(\d+)\s*(?:times?|x|hours?|murat)', match.group(0), re.IGNORECASE)
                         freq_num = freq_match.group(1) if freq_match else "1"
                     
                     # Extract duration (default to "5 days" if not found)
                     if len(groups) >= 4 and groups[3]:
                         duration_num = groups[3]
                     else:
-                        dur_match = re.search(r'for\s+(\d+)\s*days?', match.group(0), re.IGNORECASE)
-                        duration_num = dur_match.group(1) if dur_match else "5"
+                        dur_match = re.search(r'for\s+(\d+)\s*days?|ayyam\s+(\d+)', match.group(0), re.IGNORECASE)
+                        duration_num = dur_match.group(1) or dur_match.group(2) if dur_match else "5"
                     
                     seen.add(drug_name)
                     
@@ -256,11 +258,12 @@ class AdvancedExtractor:
         return medicines
 
     def _extract_complaints(self, text: str) -> List[str]:
-        """Extract key complaints - deduplicated"""
+        """Extract key complaints - deduplicated and multilingual"""
         text_lower = text.lower()
         complaints = []
         found = {}
         
+        # English complaint checks
         complaint_checks = [
             ('difficulty breathing', 'difficulty breathing', 1),
             ('difficulty swallowing', 'difficulty swallowing', 1),
@@ -272,22 +275,40 @@ class AdvancedExtractor:
             ('pain', 'pain', 3),
         ]
         
+        # Add Arabic complaint patterns
+        complaint_checks.extend([
+            (r'sudaa|صداع', 'headache', 2),
+            (r'humma|حمى', 'fever', 2),
+            (r'suaal|سعال', 'cough', 2),
+            (r'alam\s+fi\s+alhalq|ألم في الحلق', 'throat pain', 2),
+            (r'ishal|إسهال', 'diarrhea', 2),
+            (r'ghitaab|غثيان', 'nausea', 2),
+            (r'usn\s+ma|حرارة', 'fever', 2),
+        ])
+        
+        # Add Thanglish complaint patterns
+        complaint_checks.extend([
+            (r'kayachel|kaichel|kaiachel|kaychal', 'fever', 2),
+            (r'vali', 'pain', 3),
+            (r'mooka\s+kadai', 'nasal congestion', 2),
+        ])
+        
         for keyword, label, priority in complaint_checks:
-            if keyword in text_lower and label not in found:
+            if re.search(keyword, text_lower, re.IGNORECASE) and label not in found:
                 found[label] = priority
         
         complaints = sorted(found.keys(), key=lambda x: found[x])
         return complaints[:5]
 
     def _extract_diagnosis_advanced(self, text: str) -> List[str]:
-        """Extract diagnoses with transcription error handling"""
+        """Extract diagnoses with transcription error handling and multilingual support"""
         text_lower = text.lower()
         # Correct medical terms first to catch transcription errors
         corrected_text = self._correct_medical_terms(text_lower)
         diagnoses = []
         found = {}
         
-        # Handle common transcription errors and variations
+        # Handle common transcription errors and variations (English)
         diagnosis_checks = [
             ('pharyngitis', 'acute pharyngitis', 1),
             ('sinusitis', 'acute sinusitis', 1),
@@ -304,6 +325,28 @@ class AdvancedExtractor:
             ('hypertension', 'hypertension', 2),
             ('fever', 'fever', 3),
         ]
+        
+        # Add Arabic diagnosis patterns
+        diagnosis_checks.extend([
+            # Arabic patterns (transliterated and common terms)
+            (r'iltiab\s+alhalq|التهاب الحلق', 'pharyngitis', 1),
+            (r'adwa\s+bakteriya|عدوى بكتيرية', 'bacterial infection', 1),
+            (r'adwa\s+virusia|عدوى فيروسية', 'viral infection', 2),
+            (r'iltiab\s+alsgag|التهاب الصدر', 'bronchitis', 1),
+            (r'humma|حمى', 'fever', 2),
+            (r'sudaa|صداع', 'headache', 2),
+            (r'suaal|سعال', 'cough', 2),
+            (r'ishal|إسهال', 'diarrhea', 2),
+            (r'sakkari|السكري', 'diabetes', 2),
+            (r'daghtt|ضغط', 'hypertension', 2),
+        ])
+        
+        # Add Thanglish diagnosis patterns
+        diagnosis_checks.extend([
+            (r'sinus\s+vali|sinusitis', 'sinusitis', 1),
+            (r'noi', 'disease', 3),
+            (r'infection', 'infection', 3),
+        ])
         
         for keyword, label, priority in diagnosis_checks:
             if re.search(keyword, corrected_text, re.IGNORECASE) and label not in found:
@@ -365,7 +408,7 @@ class AdvancedExtractor:
         return self._extract_diagnosis_advanced(text)
 
     def _correct_medical_terms(self, text: str) -> str:
-        """Correct common transcription errors"""
+        """Correct common transcription errors across multiple languages"""
         result = text.lower().strip()
         
         # Apply central corrections from database
@@ -373,7 +416,7 @@ class AdvancedExtractor:
             for pattern, correction in medicine_database.DRUG_CORRECTIONS.items():
                 result = re.sub(pattern, correction, result, flags=re.IGNORECASE)
         
-        # Additional system-specific/filler corrections
+        # Additional system-specific/filler corrections (English)
         corrections = {
             r'\bparagenesis\b': 'pharyngitis',
             r'\bpyrogynous\b': 'pharyngitis',
@@ -385,7 +428,34 @@ class AdvancedExtractor:
             r'\bantibiotic\s+risk\b': 'antibiotics',
         }
         
-        for pattern, correction in corrections.items():
+        # Arabic transliteration corrections
+        arabic_corrections = {
+            r'\baspireen\b': 'aspirin',
+            r'\bdawaa\b|\bdiwa\b': 'medicine',
+            r'\bmarad\b': 'disease',
+            r'\balam\b': 'pain',
+            r'\bhumma\b': 'fever',
+            r'\bsudaa\b': 'headache',
+            r'\bsuaal\b': 'cough',
+            r'\bishal\b': 'diarrhea',
+            r'\biltiab\b': 'inflammation',
+            r'\badwa\b': 'infection',
+            r'\bbakteriya\b': 'bacterial',
+            r'\bvirusia\b': 'viral',
+        }
+        
+        # Thanglish corrections
+        thanglish_corrections = {
+            r'\bkayachel\b|\bkaichel\b|\bkaiachel\b|\bkaychal\b': 'fever',
+            r'\bvali\b': 'pain',
+            r'\bnoi\b': 'disease',
+            r'\bmarunthu\b': 'medicine',
+            r'\bmooka\s+kadai\b|\bmookkadaippu\b': 'nasal congestion',
+            r'\birukku\b|\birundha\b': 'is/has',
+        }
+        
+        # Apply all corrections
+        for pattern, correction in {**corrections, **arabic_corrections, **thanglish_corrections}.items():
             result = re.sub(pattern, correction, result, flags=re.IGNORECASE)
         
         return result
@@ -541,13 +611,16 @@ class MedicalSystem:
 
         # Audio-level language already detected by Whisper probe.
         # Run text-level detector as secondary confirmation.
-        # If Whisper already detected Tamil or Thanglish, trust it over text-only fallback.
+        # If Whisper already detected Tamil, Thanglish, or Arabic, trust it over text-only fallback.
         text_lang_code, text_lang_metadata = self.language_detector.detect(transcript)
 
-        # Merge: audio detection wins for 'ta' (Tamil Unicode), text detection wins for 'tanglish'
+        # Merge: audio detection wins for 'ta' (Tamil Unicode) and 'ar' (Arabic), text detection wins for 'tanglish'
         if audio_detected_lang == "ta":
             lang_code = "ta"
             lang_metadata = {"confidence": 0.95, "reason": "Tamil detected by Whisper (audio-level)"}
+        elif audio_detected_lang == "ar":
+            lang_code = "ar"
+            lang_metadata = {"confidence": 0.95, "reason": "Arabic detected by Whisper (audio-level)"}
         elif audio_detected_lang == "tanglish" or text_lang_code == "tanglish":
             lang_code = "tanglish"
             lang_metadata = {

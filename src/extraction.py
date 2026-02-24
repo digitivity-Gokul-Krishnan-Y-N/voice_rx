@@ -59,7 +59,7 @@ class GroqLLMExtractor:
     """
 
     EXTRACTION_PROMPT = """
-You are a medical data extraction specialist. Extract prescription data from the following medical consultation.
+You are a medical data extraction specialist. Extract prescription data from the following medical consultation in ANY LANGUAGE.
 
 ⚠️ CRITICAL JSON FORMAT REQUIREMENTS:
 - You MUST return STRICTLY VALID JSON ONLY
@@ -77,45 +77,41 @@ You are a medical data extraction specialist. Extract prescription data from the
 - Keep complaint and diagnosis strings concise
 - Minimize array/object nesting where possible
 - Output MUST begin with {{ and MUST end with }}
+- All medicine names, diagnoses, and complaints MUST be in ENGLISH ONLY
 
-LANGUAGE NOTICE:
-- The transcript may be in English, Tamil (Unicode), or Thanglish (Tamil words in English letters).
-- Thanglish examples:
-  * 'noi' = disease, 'marunthu' = medicine, 'vali' = pain, 'kaichal' = fever
-  * 'irukku' = there is/has, 'irundha' = if there is
-  * 'daily X times' or 'daily X murai' = X times a day
-  * 'food apram' or 'saptu' or 'sapda' = after food
-  * 'night time' or 'iravu' or 'raatriyil' = at night
-  * 'nasal block' or 'mookkadaippu' = nasal congestion
-  * 'sinusitis' or 'sinus vali' = sinusitis
-  * 'CBC' = Complete Blood Count (lab test)
-  * 'CRP' = C-Reactive Protein test (inflammation)
-  * 'X-ray PNS' = Paranasal Sinus X-ray
-  * 'nasal swab' = nasal swab test
-  * 'kammi panna' or 'kammi aagum' = reduce/decrease
-  * 'confirm panna' = to confirm/diagnose
-  * 'suggest panren' = I suggest
-  * 'follow pannu' = follow/take
-  * 'eduthukko' = take it
-  * 'use pannu' = use it
-  * 'avoid pannu' = avoid it
-- If Tamil/Thanglish text appears, interpret it according to medical context and extract only English medical data.
+🌍 MULTILINGUAL SUPPORT - CRITICAL EXTRACTION RULES:
 
-IMPORTANT: The transcript is from automatic speech recognition (ASR) and may contain residual errors even after cleaning.
-Common ASR artifacts to recognize:
-- 'inflection' or 'infraction' should be 'infection'
-- 'antibiotic risk' should be 'antibiotics'
-- 'paragenesis' should be 'pharyngitis'
-- 'back inflection' should be 'bacterial infection'
-- 'kayachel' / 'kaychel' should be 'fever'
-- 'levosidazine' or 'levocitirizine' should be 'levocetirizine'
-- 'benzimidine' or 'benzodiazine' should be 'benzydamine' (throat spray)
-- 'trepsils' should be 'strepsils'
-- 'vitamin c' or 'zinc' should be captured as supplements
-- 'one tablet at night' means 'once a day' frequency
+📍 ENGLISH CONSULTATION:
+- Extract directly. Diagnoses like: viral pharyngitis, bacterial infection, sinusitis, asthma, diabetes
+- Medicines: paracetamol, amoxicillin, levocetirizine, omeprazole, amlodipine
+- Frequency terms: "3 times a day", "once daily", "every 8 hours", "at night"
 
-Use MEDICAL KNOWLEDGE and clinical reasoning to interpret the transcript correctly.
-If the transcription is very poor and you cannot confidently extract data, return null values rather than inventing data.
+📍 TAMIL/THANGLISH CONSULTATION (Tamil words in English letters):
+- 'noi' = disease, 'marunthu' = medicine, 'vali' = pain, 'kaichal'/'kayachel'/'kaiachel' = fever
+- 'irukku' = has/is, 'irundha' = if there is, 'varaam'/'varum' = may occur
+- 'daily X murai' or 'daily X times' = X times a day
+- 'food apram'/'saptu patthu' = after food, 'iravu'/'night time' = at night
+- 'nalla vali' = severe pain, 'slight vali' = mild pain
+- 'mookkadaippu' = nasal congestion, 'sinus vali' = sinusitis
+- Medicines: aspirin = 'aspirin', paracetamol = 'paracetamol'/'para', amoxicillin = 'amox'/'amoxycillin'
+- Amount: '500 mg' = '500 milligram', 'oru tablet' = '1 tablet', 'rendu tablet' = '2 tablets'
+- 'kammi panna' = reduce/do less, 'confirm panna' = diagnose/confirm
+
+📍 ARABIC CONSULTATION:
+- 'مرض'/'marad' = disease, 'دواء'/'dawa' = medicine, 'ألم'/'alam' = pain, 'حمى'/'humma' = fever
+- 'صداع'/'sudaa' = headache, 'سعال'/'suaal' = cough, 'إسهال'/'ishal' = diarrhea
+- 'عدوى بكتيرية'/'adwa bakteriya' = bacterial infection, 'التهاب الحلق'/'iltiab alhalq' = pharyngitis
+- Frequency: 'مرات في اليوم'/'marat fi alyawm' = times a day, 'ثلاث مرات'/'talat marat' = 3 times
+- Duration: 'أيام'/'ayyam' = days, 'أسبوع'/'usbua' = week
+- Instructions: 'بعد الأكل'/'baada alakl' = after food, 'قبل النوم'/'qabl alnawm' = before sleep
+- Medicines in Arabic: 'الأسبرين'/'aspireen', 'الباراسيتامول'/'paracetamol', 'الأموكسيسيللين'/'amoxicillin'
+
+IMPORTANT EXTRACTION RULES:
+- ALWAYS translate/convert medicine names, diagnoses, and complaints to ENGLISH EQUIVALENTS
+- For ambiguous terms, use medical context to determine meaning
+- If text is very unclear, return null rather than guessing
+- Recognize common ASR artifacts: 'inflection'→'infection', 'paragenesis'→'pharyngitis', 'antibiotic risk'→'antibiotics'
+- Patient names should be extracted as given (can be local language), but all clinical data MUST be ENGLISH
 
 Return JSON with these exact keys (NO OTHER TEXT, NO EXPLANATIONS):
 {{
@@ -129,7 +125,7 @@ Return JSON with these exact keys (NO OTHER TEXT, NO EXPLANATIONS):
       "dose": "500 mg",
       "frequency": "3 times a day",
       "duration": "5 days",
-      "instruction": "as needed"
+      "instruction": "after food"
     }},
     {{
       "name": "levocetirizine",
@@ -137,17 +133,10 @@ Return JSON with these exact keys (NO OTHER TEXT, NO EXPLANATIONS):
       "frequency": "once a day",
       "duration": "5 days",
       "instruction": "at night"
-    }},
-    {{
-      "name": "benzydamine throat spray",
-      "dose": "3-4 sprays",
-      "frequency": "3-4 times a day",
-      "duration": "5 days",
-      "instruction": "topical"
     }}
   ],
   "tests": [],
-  "advice": ["avoid cold drinks", "gargle with salt water"]
+  "advice": ["avoid cold drinks", "drink warm water", "rest adequately"]
 }}
 
 Medical Consultation:
