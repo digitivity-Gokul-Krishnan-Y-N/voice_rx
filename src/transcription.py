@@ -192,6 +192,10 @@ class WhisperTranscriber:
             "மருத்துவ ஆலோசனை. மருத்துவர் மருந்துகளை பரிந்துரைக்கிறார். "
             "Translate all content to English medical terminology."
         ),
+        "ar": (
+            "استشارة طبية. الطبيب يوصي بالأدوية. "
+            "Include medicine names, dosages, frequency in medical terminology."
+        ),
         "tanglish": (
             "Medical consultation. Patient name, diagnosis, medicines with dosages. "
             "Drug names, frequencies, durations. Tamil-origin words may appear."
@@ -242,7 +246,12 @@ class WhisperTranscriber:
             # ── Step 1: Detect language if not provided ─────────────────────
             if language:
                 detected_lang = language
-                whisper_lang = "ta" if language == "ta" else "en"
+                if language == "ta":
+                    whisper_lang = "ta"
+                elif language == "ar":
+                    whisper_lang = "ar"
+                else:
+                    whisper_lang = "en"
                 logger.info(f"[LANG] Using provided language: {language}")
             else:
                 detected_lang, whisper_lang = self._detect_language_from_audio(audio_path)
@@ -338,13 +347,26 @@ class WhisperTranscriber:
                 return "en", "en"
 
             else:
-                # Unknown/unsupported language (e.g., Hindi, Telugu)
-                # Try text detection on probe output
+                # Unknown/unsupported language (e.g., Hindi, Telugu, or Whisper-reported 'arabic')
+                # Map known languages to ISO 639-1 codes
+                language_map = {
+                    'arabic': 'ar',
+                    'ar': 'ar',
+                    'tamil': 'ta',
+                    'ta': 'ta',
+                }
+                
+                if whisper_detected.lower() in language_map:
+                    mapped_lang = language_map[whisper_detected.lower()]
+                    logger.info(f"[DETECT] Whisper detected '{whisper_detected}' → mapped to '{mapped_lang}'")
+                    return mapped_lang, mapped_lang
+                
+                # Try text detection on probe output as fallback
                 if self.lang_detector and probe_text:
                     text_lang, _ = self.lang_detector.detect(probe_text)
                     logger.info(f"[DETECT] Unknown Whisper lang '{whisper_detected}', "
                                 f"text detector says '{text_lang}' → using '{text_lang}'")
-                    whisper_api_lang = "ta" if text_lang == "ta" else "en"
+                    whisper_api_lang = "ta" if text_lang == "ta" else "ar" if text_lang == "ar" else "en"
                     return text_lang, whisper_api_lang
 
                 logger.warning(f"[DETECT] Unrecognized language '{whisper_detected}', defaulting to English")
@@ -380,7 +402,7 @@ class WhisperTranscriber:
         if whisper_lang:  # None means no language hint (auto)
             kwargs["language"] = whisper_lang
 
-        # For Tamil: request translation to English
+        # For Tamil & Arabic: request translation to English
         if detected_lang == "ta":
             try:
                 with open(audio_path, "rb") as audio_file:
@@ -399,6 +421,24 @@ class WhisperTranscriber:
                 logger.warning(f"[WHISPER] Translation failed: {e} — falling back to transcription")
                 # Fall through to standard transcription below
                 kwargs["language"] = "ta"
+        
+        # For Arabic: also use translation mode to convert Arabic → English
+        elif detected_lang == "ar":
+            try:
+                with open(audio_path, "rb") as audio_file:
+                    response = self.client.audio.translations.create(
+                        file=audio_file,
+                        model="whisper-1",
+                        prompt="Medical consultation. Patient names, drug names, dosages, diagnosis, medicines.",
+                    )
+                text = response.text.strip()
+                text = self._strip_prompt_echo(text)
+                logger.info(f"[WHISPER] Arabic → English translation: {len(text)} chars")
+                return text
+            except Exception as e:
+                logger.warning(f"[WHISPER] Arabic translation failed: {e} — falling back to transcription")
+                # Fall through to standard transcription with Arabic language hint
+                kwargs["language"] = "ar"
 
         # Standard transcription (English / Thanglish)
         with open(audio_path, "rb") as audio_file:

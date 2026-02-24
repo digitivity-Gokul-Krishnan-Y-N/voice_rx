@@ -324,3 +324,50 @@
 2026-02-23 17:45:15,038 - INFO - Pre-improvement: medicines=1, diagnosis=1
 2026-02-23 17:45:15,038 - INFO - Post-improvement: medicines=1, diagnosis=1
 2026-02-23 17:45:15,039 - INFO - Validation: [OK] PASSED (0 errors, 1 warnings)
+2026-02-24 18:42:42,727 - INFO - 
+================================================================================
+2026-02-24 18:42:42,729 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-24 18:42:42,729 - INFO - ================================================================================
+2026-02-24 18:42:43,563 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-24 18:42:43,563 - INFO - Groq API key detected
+2026-02-24 18:42:43,589 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 18:42:44,953 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 18:42:44,953 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 18:42:44,953 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-24 18:42:44,964 - INFO - [OK] System ready with advanced extraction
+
+2026-02-24 18:42:44,967 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-24 18:42:54,280 - INFO - [DETECT] Whisper detected language: 'arabic'
+2026-02-24 18:42:54,280 - INFO - [DETECT] Probe text sample: مرحباً ميرة تعانينا من أعراض تشير إلى اتهاب المعدة الحاد وهو اتهاب في بطانة المعدة قد يحدث بسبب العد
+2026-02-24 18:42:54,285 - INFO - [EN] English detected (default)
+2026-02-24 18:42:54,285 - INFO - [DETECT] Unknown Whisper lang 'arabic', text detector says 'en' → using 'en'
+2026-02-24 18:42:54,285 - INFO - [WHISPER] Transcribing as 'en' (whisper_lang='en')
+2026-02-24 18:43:03,997 - INFO - [WHISPER] Raw transcript (698 chars): Hello, Mira. We have symptoms that indicate severe stomach pain. It is a pain in the stomach. It may occur due to an inf...
+2026-02-24 18:43:04,007 - INFO - [OK] Transcribed (698 chars, 127 words) [lang=en]
+2026-02-24 18:43:04,027 - INFO - [TANGLISH] Thanglish detected (1 term matches)
+2026-02-24 18:43:04,041 - INFO - [THANGLISH] No Thanglish terms found for normalization
+2026-02-24 18:43:04,072 - INFO - [NORMALIZE] Transcript cleaned (698 → 710 chars)
+2026-02-24 18:43:04,081 - INFO - Audio Analysis: Quality=77%, Language=tanglish(65%), Length=710 chars, Words=131
+2026-02-24 18:43:04,081 - INFO - Routing Decision: quality=77%, words=131, confidence=92%, language=tanglish
+2026-02-24 18:43:04,081 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-24 18:43:04,091 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-24 18:43:04,094 - INFO - Full cleaned transcript for extraction (710 chars): Hello, mira. we have symptoms that indicate severe stomach pain. it is a pain in the stomach. it may occur due to an infection, or eating in an unorganized way, or being stressed, or eating hot and fatty foods in large quantities. the goal of the treatment is to reduce stomach pain, reduce the symptoms, and help the stomach heal. take 40 ml of bento brazul once a day a day before iftar to reduce stomach acid. take 10 ml of anti-acid drink twice a day a day after meals to reduce the symptoms. you can take 4 ml of omden citron when needed if there is nausea or vomiting, according to the prescribed dosage. take a spoon of sugar before meals to protect the stomach. for more information, visit www.fema.gov...
+2026-02-24 18:43:04,094 - INFO - Running advanced extraction on 710 chars...
+2026-02-24 18:43:04,097 - INFO - Transcript begins: Hello, mira. we have symptoms that indicate severe stomach pain. it is a pain in the stomach. it may occur due to an infection, or eating in an unorga...
+2026-02-24 18:43:04,101 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-24 18:43:07,611 - INFO - [OK] Groq extraction: 4 medicines, 0 diagnoses
+2026-02-24 18:43:07,611 - INFO - Pre-improvement: medicines=4, diagnosis=0
+2026-02-24 18:43:07,633 - INFO - Post-improvement: medicines=4, diagnosis=1
+2026-02-24 18:43:07,636 - INFO - Validation: [OK] PASSED (0 errors, 1 warnings)
+2026-02-24 18:47:07,369 - INFO - Groq API key detected
+2026-02-24 18:47:08,156 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 18:47:09,230 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 18:47:09,230 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 18:47:09,230 - INFO - Running advanced extraction on 1166 chars...
+2026-02-24 18:47:09,230 - INFO - Transcript begins: مرحباً ميرا،
+
+تعانين من أعراض تشير إلى التهاب المعدة الحاد، وهو التهاب في بطانة المعدة. قد يحدث بسبب العدوى، أو تناول الطعام بشكل غير منتظم، أو التوتر...
+2026-02-24 18:47:09,232 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-24 18:47:14,078 - INFO - [OK] Groq extraction: 5 medicines, 1 diagnoses
+2026-02-24 18:47:14,080 - INFO - Pre-improvement: medicines=5, diagnosis=1
+2026-02-24 18:47:14,084 - INFO - Post-improvement: medicines=5, diagnosis=1
