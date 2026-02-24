@@ -170,6 +170,10 @@ class AdvancedExtractor:
             r'(?:^|[,;])\s*([a-z]+(?:\s+[a-z]+)?)\s*,?\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|tablet|capsule|drop|unit|mc|mcd|cd)s?\s+(?:\d+|three|two|four)\s*(?:times?|x)\s+(?:daily|a\s+day)',
             # Simpler pattern: "erythromycin 500 mg" standalone (extract what we can)
             r'(?:prescription|medicine|take|dawa)(?:d)?[,:]?\s*([a-z]+(?:\s+[a-z]+)?)\s+(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|drop|unit)',
+            # Pattern for "Drug X Y times daily" format (common in Arabic speech)
+            r'(?:take|dawa|medicine)\s+(\d+)\s*(?:pill|pills|tablet|capsule|drop)s?\s+(?:of\s+)?([a-z]+(?:\s+[a-z]+)?)\s+(?:once|once\s+a\s+day|daily|(\d+)\s+times?\s+(?:a\s+)?day)',
+            # Pattern for "Drug X once/twice a day"
+            r'([a-z]+(?:\s+[a-z]+)?)\s+(\d+)\s*(?:mg|ml|mcg|gm|gram|iu|drop|unit|pill|pills|tablet|capsule)s?\s+(?:once|twice|(?:\d+)\s+times?)\s+(?:a\s+)?day',
             # Very simple: "Drug X every Y hours" or "Drug X take at night"
             r'([a-z]+(?:\s+[a-z]+)?)\s+(?:(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|gm|gram|iu|drop|unit))?,?\s+(?:every|at|one\s+)?(?:(\d+)\s*(?:hours?|times?\s+daily|times?\s+a\s+day))?',
             # Sprays/Lozenges: "Benzydamine throat spray use 3-4 times daily"
@@ -198,22 +202,22 @@ class AdvancedExtractor:
                         unit = 'ml'
                     elif 'mcg' in match_text:
                         unit = 'mcg'
-                    elif 'tablet' in match_text:
-                        unit = 'tablet'
+                    elif 'pill' in match_text or 'tablet' in match_text:
+                        unit = 'mg'  # Default mg for pills/tablets instead of "pills"
                     elif 'capsule' in match_text:
-                        unit = 'capsule'
+                        unit = 'mg'  # Default mg for capsules
                     
                     # Extract dose number if available
                     if len(groups) >= 2 and groups[1]:
                         dose_num = groups[1]
                     else:
                         # Try to find dose in the match text
-                        dose_match = re.search(r'(\d+)\s*(?:mg|ml|mcg)', match_text)
+                        dose_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg)', match_text)
                         if dose_match:
                             dose_num = dose_match.group(1)
                     
                     # Skip if it's a verb/non-drug word
-                    if drug_raw in ['prescribe', 'take', 'give', 'tablet', 'medicine', 'drug', 'medicines', 'prescription', 'every', 'one', 'at', 'dawa']:
+                    if drug_raw in ['prescribe', 'take', 'give', 'tablet', 'medicine', 'drug', 'medicines', 'prescription', 'every', 'one', 'at', 'dawa', 'pill', 'pills', 'capsule']:
                         continue
                     
                     # Get just the first word (primary drug name)
@@ -239,7 +243,7 @@ class AdvancedExtractor:
                     
                     seen.add(drug_name)
                     
-                    # Build dose string - optional if not found
+                    # Build dose string - prioritize mg/ml units over "pills"
                     dose_str = f"{dose_num} {unit}" if dose_num else unit
                     
                     medicines.append({
@@ -415,6 +419,18 @@ class AdvancedExtractor:
         if hasattr(medicine_database, 'DRUG_CORRECTIONS'):
             for pattern, correction in medicine_database.DRUG_CORRECTIONS.items():
                 result = re.sub(pattern, correction, result, flags=re.IGNORECASE)
+        
+        # Phonetic corrections for Arabic speech translation artifacts (PRIORITY)
+        phonetic_corrections = {
+            r'\bbento\s+brazul\b': 'pantoprazole',
+            r'\bonden\s+citron\b': 'ondansetron',
+            r'\banti[- ]?acid\s+drink\b': 'antacid',
+            r'\bsucralfate\s+meal\b': 'sucralfate',
+            r'\bprobiotic\s+capsule\b': 'probiotic',
+        }
+        
+        for pattern, replacement in phonetic_corrections.items():
+            result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
         
         # Additional system-specific/filler corrections (English)
         corrections = {

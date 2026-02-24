@@ -428,7 +428,28 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
 
         corrected = name.lower()
 
-        # Apply regex corrections
+        # Phonetic corrections for Arabic speech translation artifacts
+        phonetic_corrections = {
+            r'\bbento\s+brazul\b': 'pantoprazole',
+            r'\bonden\s+citron\b': 'ondansetron',
+            r'\banti[- ]?acid\s+drink\b': 'antacid',
+            r'\bsucralfate\s+meal\b': 'sucralfate',
+            r'\bprobiotic\s+capsule\b': 'probiotic',
+            r'\bparacetal\b': 'paracetamol',
+            r'\baspireen\b': 'aspirin',
+            r'\bamoxysilan\b': 'amoxicillin',
+            r'\bazithro\b': 'azithromycin',
+            r'\bciprofloxacine\b': 'ciprofloxacin',
+            r'\blevoceti\b': 'levocetirizine',
+            r'\bomeprazol\b': 'omeprazole',
+            r'\bdomeperidone\b': 'domperidone',
+        }
+        
+        # Apply phonetic corrections first
+        for pattern, replacement in phonetic_corrections.items():
+            corrected = re.sub(pattern, replacement, corrected, flags=re.IGNORECASE)
+
+        # Apply regex corrections (from database)
         for pattern, replacement in DRUG_CORRECTIONS.items():
             corrected = re.sub(pattern, replacement, corrected, flags=re.IGNORECASE)
 
@@ -440,11 +461,18 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
                 unique_words.append(w)
         corrected = ' '.join(unique_words)
 
-        # Fuzzy match if needed
-        if len(corrected) < 3:
-            matches = get_close_matches(corrected.lower(), KNOWN_DRUGS, n=1, cutoff=0.4)
+        # Fuzzy match - improved logic for longer strings
+        corrected_lower = corrected.lower().strip()
+        if corrected_lower and corrected_lower not in KNOWN_DRUGS:
+            # Try fuzzy matching with higher cutoff for known drugs
+            matches = get_close_matches(corrected_lower, KNOWN_DRUGS, n=1, cutoff=0.6)
             if matches:
                 corrected = matches[0]
+            elif len(corrected_lower) < 3:
+                # For very short names, use lower cutoff
+                matches = get_close_matches(corrected_lower, KNOWN_DRUGS, n=1, cutoff=0.4)
+                if matches:
+                    corrected = matches[0]
 
         return corrected.lower()
 
