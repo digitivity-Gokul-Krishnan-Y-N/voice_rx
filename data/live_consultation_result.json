@@ -1,48 +1,58 @@
 {
   "success": true,
-  "patient_name": "mira",
+  "patient_name": null,
   "complaints": [
     "stomach pain",
-    "nausea",
-    "vomiting"
+    "cough",
+    "bloating",
+    "constipation"
   ],
   "diagnosis": [
-    "infection"
+    "gastritis"
   ],
   "medicines": [
     {
-      "name": "bento brazul",
-      "dose": "40 ml",
+      "name": "pantoprazole",
+      "dose": "40 pills",
       "frequency": "once a day",
       "duration": null,
-      "instruction": "before iftar",
+      "instruction": "before food",
       "route": "oral",
       "side_effects": []
     },
     {
-      "name": "anti-acid drink",
-      "dose": "10 ml",
+      "name": "antacid",
+      "dose": "10 pills",
       "frequency": "twice a day",
       "duration": null,
-      "instruction": "after meals",
+      "instruction": "after food",
       "route": "oral",
       "side_effects": []
     },
     {
-      "name": "omden citron",
-      "dose": "4 ml",
+      "name": "ondansetron",
+      "dose": "4 pills",
       "frequency": "as needed",
       "duration": null,
-      "instruction": "as needed for nausea or vomiting",
+      "instruction": "if cough",
       "route": "oral",
       "side_effects": []
     },
     {
-      "name": "sugar",
-      "dose": "1 spoon",
-      "frequency": "as needed",
+      "name": "tess oral paste",
+      "dose": "1 pack",
+      "frequency": "once a day",
       "duration": null,
       "instruction": "before meals",
+      "route": "oral",
+      "side_effects": []
+    },
+    {
+      "name": "ciprobiotic tablet",
+      "dose": "1 capsule",
+      "frequency": "once a day",
+      "duration": null,
+      "instruction": "after meals",
       "route": "oral",
       "side_effects": []
     }
@@ -54,12 +64,13 @@
     "Avoid very cold drinks",
     "Avoid spicy food",
     "Avoid oily food",
+    "Rest your voice as much as possible",
     "Watch for side effects like nausea, loose stools, or stomach upset",
     "Contact doctor if you develop severe diarrhea, vomiting, skin rash, itching, swelling, or difficulty breathing"
   ],
-  "language": "tanglish",
-  "confidence": 0.7653140180430257,
+  "language": "ar",
+  "confidence": 0.8359341201716738,
   "extraction_method": "groq",
-  "processing_time_sec": 22.686392,
+  "processing_time_sec": 81.718178,
   "route": "groq_only"
 }

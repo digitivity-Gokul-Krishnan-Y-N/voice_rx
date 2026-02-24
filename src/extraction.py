@@ -398,7 +398,7 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
     # ── Post-processing ────────────────────────────────────────────────────────
 
     def _post_process(self, data: Dict) -> Dict:
-        """Post-process extracted data: fix drug names, deduplicate patient name."""
+        """Post-process extracted data: fix drug names, fix doses, deduplicate patient name."""
         # Deduplicate patient name ("Rohit Rohit" → "Rohit")
         patient_name = data.get('patient_name')
         if patient_name and isinstance(patient_name, str):
@@ -409,32 +409,126 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
                     seen.append(w)
             data['patient_name'] = " ".join(seen) if seen else None
 
-        # Fix drug names
+        # Fix drug names and doses
         medicines = data.get('medicines', [])
         corrected = []
         for med in medicines:
             if isinstance(med, dict) and 'name' in med:
                 name = self._correct_drug_name(med['name'])
                 med['name'] = name
+                
+                # Fix dose format - convert "pills" to proper units
+                if 'dose' in med and med['dose']:
+                    med['dose'] = self._normalize_dose(name, med['dose'])
+            
             corrected.append(med)
 
         data['medicines'] = corrected
         return data
+    
+    def _normalize_dose(self, drug_name: str, dose_str: str) -> str:
+        """
+        Normalize dose format.
+        Converts "40 pills" → "40 mg", "1 pack" → "1 unit", etc.
+        """
+        if not dose_str:
+            return dose_str
+        
+        dose_str_lower = dose_str.lower().strip()
+        
+        # Extract numeric part
+        num_match = re.search(r'(\d+(?:\.\d+)?)', dose_str_lower)
+        if not num_match:
+            return dose_str
+        
+        numeric_part = num_match.group(1)
+        
+        # Map delivery format to proper units
+        unit_map = {
+            r'pills?': 'mg',
+            r'tablets?': 'mg',
+            r'capsules?': 'mg',
+            r'drops?': 'drops',
+            r'packs?': 'unit',
+            r'vials?': 'unit',
+            r'powders?': 'mg',
+            r'sprays?': 'spray',
+            r'lozenges?': 'unit',
+            r'syrups?': 'ml',
+            r'ml': 'ml',
+            r'(?:cc|cubic\s+cm)': 'ml',
+        }
+        
+        # Check current unit
+        for pattern, replacement_unit in unit_map.items():
+            if re.search(pattern, dose_str_lower):
+                # Special case: if dose already has mg/ml/mcg, keep it
+                if re.search(r'(mg|ml|mcg|gm|gram|iu|unit|drops?)', dose_str_lower):
+                    # Already has a unit, keep the entire dose
+                    return dose_str
+                # Otherwise, replace with appropriate unit
+                return f"{numeric_part} {replacement_unit}"
+        
+        # No recognized format, return as-is
+        return dose_str
 
     def _correct_drug_name(self, name: str) -> str:
-        """Correct drug name using database corrections and fuzzy matching."""
+        """
+        Correct drug name using database corrections, phonetic mappings, and fuzzy matching.
+        Handles names with delivery formats (e.g., "tess oral paste", "ciprobiotic tablet").
+        """
         if not MEDICINE_DB_AVAILABLE:
             return name.lower()
 
-        corrected = name.lower()
+        original_name = name.lower().strip()
+        corrected = original_name
 
-        # Phonetic corrections for Arabic speech translation artifacts
+        # FIRST: Remove common delivery format suffixes
+        # This is crucial - must happen before other corrections
+        delivery_formats = [
+            r'\s+(?:oral\s+)?paste\s*$',
+            r'\s+oral\s+solution\s*$',
+            r'\s+tablets?\s*$',
+            r'\s+capsules?\s*$',
+            r'\s+spray\s*$',
+            r'\s+syrup\s*$',
+            r'\s+solution\s*$',
+            r'\s+suspension\s*$',
+            r'\s+drops?\s*$',
+            r'\s+lozenges?\s*$',
+            r'\s+powder\s*$',
+            r'\s+injectable\s*$',
+            r'\s+cream\s*$',
+            r'\s+ointment\s*$',
+            r'\s+paste\s*$',
+            r'\s+vial\s*$',
+            r'\s+liquid\s*$',
+        ]
+        
+        for pattern in delivery_formats:
+            corrected = re.sub(pattern, '', corrected, flags=re.IGNORECASE)
+        
+        corrected = corrected.strip()
+        
+        # SECOND: Apply specific Groq artifact corrections
+        groq_artifact_corrections = {
+            r'^tess$': 'sucralfate',
+            r'^sucral$': 'sucralfate',
+            r'^sucralf': 'sucralfate',
+            r'^socral': 'sucralfate',
+            r'^cipro(?!bioticfloxacin)': 'ciprofloxacin',  # cipro alone → ciprofloxacin, but not ciprobiotic
+            r'^ciprobiotic$': 'probiotic',
+            r'^cipio': 'probiotic',
+        }
+        
+        for pattern, replacement in groq_artifact_corrections.items():
+            corrected = re.sub(pattern, replacement, corrected, flags=re.IGNORECASE)
+
+        # THIRD: Phonetic corrections for Arabic speech translation artifacts
         phonetic_corrections = {
             r'\bbento\s+brazul\b': 'pantoprazole',
             r'\bonden\s+citron\b': 'ondansetron',
             r'\banti[- ]?acid\s+drink\b': 'antacid',
-            r'\bsucralfate\s+meal\b': 'sucralfate',
-            r'\bprobiotic\s+capsule\b': 'probiotic',
             r'\bparacetal\b': 'paracetamol',
             r'\baspireen\b': 'aspirin',
             r'\bamoxysilan\b': 'amoxicillin',
@@ -445,34 +539,29 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
             r'\bdomeperidone\b': 'domperidone',
         }
         
-        # Apply phonetic corrections first
         for pattern, replacement in phonetic_corrections.items():
             corrected = re.sub(pattern, replacement, corrected, flags=re.IGNORECASE)
 
-        # Apply regex corrections (from database)
+        # FOURTH: Apply database regex corrections
         for pattern, replacement in DRUG_CORRECTIONS.items():
             corrected = re.sub(pattern, replacement, corrected, flags=re.IGNORECASE)
 
-        # Remove duplicate words
+        # FIFTH: Remove duplicate words
         words = corrected.split()
         unique_words = []
         for w in words:
             if w.lower() not in [uw.lower() for uw in unique_words]:
                 unique_words.append(w)
-        corrected = ' '.join(unique_words)
+        corrected = ' '.join(unique_words).strip()
 
-        # Fuzzy match - improved logic for longer strings
+        # SIXTH: Fuzzy match against known drugs
         corrected_lower = corrected.lower().strip()
         if corrected_lower and corrected_lower not in KNOWN_DRUGS:
-            # Try fuzzy matching with higher cutoff for known drugs
-            matches = get_close_matches(corrected_lower, KNOWN_DRUGS, n=1, cutoff=0.6)
-            if matches:
-                corrected = matches[0]
-            elif len(corrected_lower) < 3:
-                # For very short names, use lower cutoff
-                matches = get_close_matches(corrected_lower, KNOWN_DRUGS, n=1, cutoff=0.4)
+            # Try fuzzy matching with decreasing cutoff thresholds
+            for cutoff in [0.75, 0.65, 0.55, 0.45]:
+                matches = get_close_matches(corrected_lower, KNOWN_DRUGS, n=1, cutoff=cutoff)
                 if matches:
-                    corrected = matches[0]
+                    return matches[0].lower()
 
         return corrected.lower()
 

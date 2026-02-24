@@ -371,3 +371,108 @@
 2026-02-24 18:47:14,078 - INFO - [OK] Groq extraction: 5 medicines, 1 diagnoses
 2026-02-24 18:47:14,080 - INFO - Pre-improvement: medicines=5, diagnosis=1
 2026-02-24 18:47:14,084 - INFO - Post-improvement: medicines=5, diagnosis=1
+2026-02-24 20:03:04,745 - INFO - 
+================================================================================
+2026-02-24 20:03:04,757 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-24 20:03:04,757 - INFO - ================================================================================
+2026-02-24 20:03:05,351 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-24 20:03:05,351 - INFO - Groq API key detected
+2026-02-24 20:03:05,361 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 20:03:06,517 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 20:03:06,519 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 20:03:06,520 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-24 20:03:06,542 - INFO - [OK] System ready with advanced extraction
+
+2026-02-24 20:03:06,548 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-24 20:03:21,813 - INFO - [DETECT] Whisper detected language: 'arabic'
+2026-02-24 20:03:21,815 - INFO - [DETECT] Probe text sample: مرحباً ميرا تعانين من أعراض تشير إلى اتهاب المعدة الحاد وهو اتهاب في بطانة المعدة قد يحدث بسبب العدو
+2026-02-24 20:03:21,815 - INFO - [DETECT] Whisper detected 'arabic' → mapped to 'ar'
+2026-02-24 20:03:21,815 - INFO - [WHISPER] Transcribing as 'ar' (whisper_lang='ar')
+2026-02-24 20:03:31,309 - INFO - [WHISPER] Arabic → English translation: 1327 chars
+2026-02-24 20:03:31,309 - INFO - [WHISPER] Raw transcript (1327 chars): Hello, Mira. You are suffering from symptoms of acute gastrointestinal inflammation, which is inflammation in the stomac...
+2026-02-24 20:03:31,327 - INFO - [OK] Transcribed (1320 chars, 226 words) [lang=ar]
+2026-02-24 20:03:31,338 - INFO - [TANGLISH] Thanglish detected (1 term matches)
+2026-02-24 20:03:31,366 - INFO - [NORMALIZE] Transcript cleaned (1320 → 1338 chars)
+2026-02-24 20:03:31,368 - INFO - Audio Analysis: Quality=83%, Language=ar(95%), Length=1338 chars, Words=232
+2026-02-24 20:03:31,368 - INFO - Routing Decision: quality=83%, words=232, confidence=92%, language=ar
+2026-02-24 20:03:31,368 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-24 20:03:31,368 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-24 20:03:31,370 - INFO - Full cleaned transcript for extraction (1338 chars): Hello, mira. you are suffering from symptoms of acute gastrointestinal inflammation, which is inflammation in the stomach. it may occur due to infection, or eating irregularly, or stress, or eating hot and fatty foods too much. the goal of the treatment is to reduce gastritis, reduce the symptoms, and help the stomach heal. the goal of the treatment is to reduce gastritis, reduce the symptoms, and help the stomach heal. take 40 pills of bento brazul once a day a day before iftar to reduce gastritis. take 10 pills of anti-acid drink after eating twice a day a day to reduce the symptoms. you can take 4 pills of onden citron when needed if there is a cough or a cough, according to the prescribed dose. take a capsule of probiotic once a day a day after meals to support digestion. make sure to eat small, regular meals, and don't skip meals. avoid hot, fatty, and sour foods. avoid coffee, tea, and alcoholic beverages. drink enough water. avoid eating late at night. try to reduce stress and f...
+2026-02-24 20:03:31,370 - INFO - Running advanced extraction on 1338 chars...
+2026-02-24 20:03:31,370 - INFO - Transcript begins: Hello, mira. you are suffering from symptoms of acute gastrointestinal inflammation, which is inflammation in the stomach. it may occur due to infecti...
+2026-02-24 20:03:31,370 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-24 20:03:38,695 - INFO - [OK] Groq extraction: 4 medicines, 1 diagnoses
+2026-02-24 20:03:38,695 - INFO - Pre-improvement: medicines=4, diagnosis=1
+2026-02-24 20:03:38,695 - INFO - Post-improvement: medicines=4, diagnosis=1
+2026-02-24 20:03:38,732 - INFO - Validation: [OK] PASSED (0 errors, 3 warnings)
+2026-02-24 20:10:48,866 - INFO - 
+================================================================================
+2026-02-24 20:10:48,869 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-24 20:10:48,870 - INFO - ================================================================================
+2026-02-24 20:10:49,301 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-24 20:10:49,302 - INFO - Groq API key detected
+2026-02-24 20:10:49,310 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 20:10:50,303 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 20:10:50,304 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 20:10:50,304 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-24 20:10:50,306 - INFO - [OK] System ready with advanced extraction
+
+2026-02-24 20:10:50,307 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-24 20:16:56,699 - INFO - 
+================================================================================
+2026-02-24 20:16:56,699 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-24 20:16:56,699 - INFO - ================================================================================
+2026-02-24 20:16:57,112 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-24 20:16:57,112 - INFO - Groq API key detected
+2026-02-24 20:16:57,128 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 20:17:01,900 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 20:17:01,900 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 20:17:01,900 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-24 20:17:01,916 - INFO - [OK] System ready with advanced extraction
+
+2026-02-24 20:17:01,916 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-24 20:17:41,528 - INFO - [DETECT] Whisper detected language: 'arabic'
+2026-02-24 20:17:41,529 - INFO - [DETECT] Probe text sample: تعانين من أعراض تشير إلى اتهاب المعدة الحاد وهو اتهاب في بطانة المعدة قد يحدث بسبب العدوى أو تناول ا
+2026-02-24 20:17:41,529 - INFO - [DETECT] Whisper detected 'arabic' → mapped to 'ar'
+2026-02-24 20:17:41,529 - INFO - [WHISPER] Transcribing as 'ar' (whisper_lang='ar')
+2026-02-24 20:18:15,961 - INFO - [WHISPER] Arabic → English translation: 1329 chars
+2026-02-24 20:18:15,961 - INFO - [WHISPER] Raw transcript (1329 chars): This patient has symptoms of acute stomach inflammation, which is inflammation in the stomach wall. It may occur due to ...
+2026-02-24 20:18:15,967 - INFO - [OK] Transcribed (1329 chars, 227 words) [lang=ar]
+2026-02-24 20:18:15,977 - INFO - [TANGLISH] Thanglish detected (1 term matches)
+2026-02-24 20:18:15,985 - INFO - [NORMALIZE] Transcript cleaned (1329 → 1347 chars)
+2026-02-24 20:18:15,987 - INFO - Audio Analysis: Quality=84%, Language=ar(95%), Length=1347 chars, Words=233
+2026-02-24 20:18:15,987 - INFO - Routing Decision: quality=84%, words=233, confidence=92%, language=ar
+2026-02-24 20:18:15,987 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-24 20:18:15,988 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-24 20:18:15,988 - INFO - Full cleaned transcript for extraction (1347 chars): This patient has symptoms of acute stomach inflammation, which is inflammation in the stomach wall. it may occur due to infection, or eating irregularly, or stress, or eating hot and fatty foods too much. the goal of the treatment is to reduce stomach inflammation, reduce symptoms, and help the stomach heal. take 40 pills of bento brazul once a day a day before breakfast to reduce stomach acid. take 10 pills of anti-acid drink after eating twice a day a day to reduce symptoms. you can take 4 pills of onden citron if necessary, if there is a cough or a cough, according to the prescribed dose. take a pack of socralfate before meals to protect the stomach wall. take a capsule of probiotic once a day a day after meals to support digestion. make sure to eat small, regular meals, and don't skip meals. avoid hot, fatty, low-fat, and sour foods. avoid coffee, tea, and soda. drink enough water. avoid eating late at night. try to reduce stress and get enough rest. there may be slight side effect...
+2026-02-24 20:18:15,988 - INFO - Running advanced extraction on 1347 chars...
+2026-02-24 20:18:15,988 - INFO - Transcript begins: This patient has symptoms of acute stomach inflammation, which is inflammation in the stomach wall. it may occur due to infection, or eating irregular...
+2026-02-24 20:18:15,988 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-24 20:18:23,620 - INFO - [OK] Groq extraction: 5 medicines, 1 diagnoses
+2026-02-24 20:18:23,620 - INFO - Pre-improvement: medicines=5, diagnosis=1
+2026-02-24 20:18:23,620 - INFO - Post-improvement: medicines=5, diagnosis=1
+2026-02-24 20:18:23,621 - INFO - Validation: [OK] PASSED (0 errors, 5 warnings)
+2026-02-24 20:19:55,718 - INFO - Groq API key detected
+2026-02-24 20:19:56,005 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 20:19:57,627 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 20:19:57,627 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 20:19:57,627 - INFO - Running advanced extraction on 1166 chars...
+2026-02-24 20:19:57,627 - INFO - Transcript begins: مرحباً ميرا،
+
+تعانين من أعراض تشير إلى التهاب المعدة الحاد، وهو التهاب في بطانة المعدة. قد يحدث بسبب العدوى، أو تناول الطعام بشكل غير منتظم، أو التوتر...
+2026-02-24 20:19:57,627 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-24 20:20:04,766 - INFO - [OK] Groq extraction: 5 medicines, 1 diagnoses
+2026-02-24 20:20:04,766 - INFO - Pre-improvement: medicines=5, diagnosis=1
+2026-02-24 20:20:04,766 - INFO - Post-improvement: medicines=5, diagnosis=1
+2026-02-24 20:20:44,871 - INFO - Groq API key detected
+2026-02-24 20:20:45,146 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 20:20:48,111 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 20:20:48,111 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 20:20:48,111 - INFO - Running advanced extraction on 1166 chars...
+2026-02-24 20:20:48,111 - INFO - Transcript begins: مرحباً ميرا،
+
+تعانين من أعراض تشير إلى التهاب المعدة الحاد، وهو التهاب في بطانة المعدة. قد يحدث بسبب العدوى، أو تناول الطعام بشكل غير منتظم، أو التوتر...
+2026-02-24 20:20:48,111 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-24 20:20:54,874 - INFO - [OK] Groq extraction: 5 medicines, 1 diagnoses
+2026-02-24 20:20:54,875 - INFO - Pre-improvement: medicines=5, diagnosis=1
+2026-02-24 20:20:54,875 - INFO - Post-improvement: medicines=5, diagnosis=1
