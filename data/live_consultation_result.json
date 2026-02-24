@@ -2,57 +2,52 @@
   "success": true,
   "patient_name": null,
   "complaints": [
-    "stomach pain",
-    "cough",
-    "bloating",
-    "constipation"
+    "fever",
+    "facial pain",
+    "pulmonary edema",
+    "face pressure",
+    "headache",
+    "eye pain",
+    "vision problems"
   ],
   "diagnosis": [
-    "gastritis"
+    "pulmonary inflammation",
+    "pulmonary edema"
   ],
   "medicines": [
     {
-      "name": "pantoprazole",
-      "dose": "40 pills",
-      "frequency": "once a day",
-      "duration": null,
-      "instruction": "before food",
-      "route": "oral",
-      "side_effects": []
-    },
-    {
-      "name": "antacid",
-      "dose": "10 pills",
+      "name": "amoxicillin",
+      "dose": null,
       "frequency": "twice a day",
-      "duration": null,
-      "instruction": "after food",
+      "duration": "5 days",
+      "instruction": null,
       "route": "oral",
       "side_effects": []
     },
     {
-      "name": "ondansetron",
-      "dose": "4 pills",
-      "frequency": "as needed",
+      "name": "paracetamol",
+      "dose": "500 mg",
+      "frequency": "every 6-8 hours",
       "duration": null,
-      "instruction": "if cough",
+      "instruction": "as needed",
       "route": "oral",
       "side_effects": []
     },
     {
-      "name": "tess oral paste",
-      "dose": "1 pack",
-      "frequency": "once a day",
+      "name": "alin gel",
+      "dose": null,
+      "frequency": "3-4 times a day",
       "duration": null,
-      "instruction": "before meals",
+      "instruction": "topical",
       "route": "oral",
       "side_effects": []
     },
     {
-      "name": "ciprobiotic tablet",
-      "dose": "1 capsule",
-      "frequency": "once a day",
+      "name": "levocetirizine",
+      "dose": null,
+      "frequency": "5 times a night",
       "duration": null,
-      "instruction": "after meals",
+      "instruction": "at night",
       "route": "oral",
       "side_effects": []
     }
@@ -60,17 +55,17 @@
   "tests": [],
   "advice": [
     "Take medicine after food to avoid stomach discomfort",
+    "Complete the full 5 day course if prescribed antibiotics",
     "Drink plenty of warm fluids",
     "Avoid very cold drinks",
-    "Avoid spicy food",
-    "Avoid oily food",
     "Rest your voice as much as possible",
     "Watch for side effects like nausea, loose stools, or stomach upset",
-    "Contact doctor if you develop severe diarrhea, vomiting, skin rash, itching, swelling, or difficulty breathing"
+    "Contact doctor if you develop severe diarrhea, vomiting, skin rash, itching, swelling, or difficulty breathing",
+    "If fever persists beyond 2-3 days or if you have difficulty swallowing or breathing, seek medical attention"
   ],
   "language": "ar",
-  "confidence": 0.8359341201716738,
+  "confidence": 0.8420077399380804,
   "extraction_method": "groq",
-  "processing_time_sec": 81.718178,
+  "processing_time_sec": 64.434136,
   "route": "groq_only"
 }

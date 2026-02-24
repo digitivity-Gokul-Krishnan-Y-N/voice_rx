@@ -516,6 +516,9 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
             r'^sucral$': 'sucralfate',
             r'^sucralf': 'sucralfate',
             r'^socral': 'sucralfate',
+            r'^alin': 'saline solution',
+            r'^saline': 'saline solution',
+            r'^salt.?water': 'saline solution',
             r'^cipro(?!bioticfloxacin)': 'ciprofloxacin',  # cipro alone → ciprofloxacin, but not ciprobiotic
             r'^ciprobiotic$': 'probiotic',
             r'^cipio': 'probiotic',
@@ -568,7 +571,7 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
     # ── Rule-based extractors ──────────────────────────────────────────────────
 
     def _extract_patient_name(self, text: str) -> Optional[str]:
-        """Extract patient name - handles multi-word names and various patterns."""
+        """Extract patient name - handles multi-word names and various patterns including Arabic."""
         text_lower = text.lower()
         
         patterns = [
@@ -578,8 +581,8 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
             r'with\s+patient\s+([a-z]+(?:\s+[a-z]+)?)',
             # "consultation with patient APC"
             r'consultation\s+with\s+(?:patient\s+)?([a-z]+)',
-            # "Hi/Hello NAME" - after greeting
-            r'(?:hi|hello|greetings)\s+([a-z]+(?:\s+[a-z]+)?)',
+            # "Hi/Hello NAME" - after greeting (including Arabic "Hello")
+            r'(?:hi|hello|greetings|one)\s+(?:of\s+)?(?:the\s+)?(?:patient\s+)?(?:one\s+)?([a-z]+)\b(?!\s+(?:symptoms|of|the|problems))',
             # "name is X" or "patient name is X"
             r'(?:patient\s+)?name\s+(?:is\s+)?([a-z]+(?:\s+[a-z]+)?)',
         ]
@@ -595,7 +598,7 @@ Output ONLY the JSON object. No markdown. No code blocks. No explanations.
                     name = match.group(1).strip()
                 
                 # Ensure it's a valid name (not time words, pronouns, etc)
-                invalid_names = ['today', 'tomorrow', 'yesterday', 'now', 'then', 'the', 'a', 'is', 'has', 'been', 'going', 'get', 'have']
+                invalid_names = ['today', 'tomorrow', 'yesterday', 'now', 'then', 'the', 'a', 'is', 'has', 'been', 'going', 'get', 'have', 'of', 'in', 'one', 'two', 'three', 'symptoms', 'acute', 'inflammation']
                 if name.lower() not in invalid_names and len(name) > 1:
                     # Keep original casing for acronyms/all-caps, otherwise capitalize
                     return name.upper() if name.isupper() else ' '.join(word.capitalize() for word in name.split())

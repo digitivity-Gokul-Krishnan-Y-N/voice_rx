@@ -476,3 +476,37 @@
 2026-02-24 20:20:54,874 - INFO - [OK] Groq extraction: 5 medicines, 1 diagnoses
 2026-02-24 20:20:54,875 - INFO - Pre-improvement: medicines=5, diagnosis=1
 2026-02-24 20:20:54,875 - INFO - Post-improvement: medicines=5, diagnosis=1
+2026-02-24 20:24:11,000 - INFO - 
+================================================================================
+2026-02-24 20:24:11,013 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-24 20:24:11,014 - INFO - ================================================================================
+2026-02-24 20:24:11,546 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-24 20:24:11,546 - INFO - Groq API key detected
+2026-02-24 20:24:11,561 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-24 20:24:14,859 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-24 20:24:14,859 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-24 20:24:14,859 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-24 20:24:14,877 - INFO - [OK] System ready with advanced extraction
+
+2026-02-24 20:24:14,879 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-24 20:25:00,872 - INFO - [DETECT] Whisper detected language: 'arabic'
+2026-02-24 20:25:00,872 - INFO - [DETECT] Probe text sample: مرحباً، تقني من أعراب تشير إلى اتهاب الجيوب الأنفية الحاد وهو اتهاب وتورم في الممرات الأنفية والجيوب
+2026-02-24 20:25:00,872 - INFO - [DETECT] Whisper detected 'arabic' → mapped to 'ar'
+2026-02-24 20:25:00,872 - INFO - [WHISPER] Transcribing as 'ar' (whisper_lang='ar')
+2026-02-24 20:25:13,399 - INFO - [WHISPER] Arabic → English translation: 1386 chars
+2026-02-24 20:25:13,401 - INFO - [WHISPER] Raw transcript (1386 chars): Hello. One of the symptoms is acute pulmonary inflammation, which is inflammation and swelling in the pulmonary arteries...
+2026-02-24 20:25:13,407 - INFO - [OK] Transcribed (1379 chars, 236 words) [lang=ar]
+2026-02-24 20:25:13,418 - INFO - [TANGLISH] Thanglish detected (2 term matches)
+2026-02-24 20:25:13,428 - INFO - [NORMALIZE] Transcript cleaned (1379 → 1386 chars)
+2026-02-24 20:25:13,429 - INFO - Audio Analysis: Quality=84%, Language=ar(95%), Length=1386 chars, Words=238
+2026-02-24 20:25:13,430 - INFO - Routing Decision: quality=84%, words=238, confidence=92%, language=ar
+2026-02-24 20:25:13,430 - INFO - [OK] GROQ-FIRST: Good input → Using Groq (primary, fastest)
+2026-02-24 20:25:13,430 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-24 20:25:13,431 - INFO - Full cleaned transcript for extraction (1386 chars): Hello. one of the symptoms is acute pulmonary inflammation, which is inflammation and swelling in the pulmonary arteries and pulmonary veins. it often occurs after a cold has come down or due to sensitivity. it may cause pressure in the face, pulmonary inflammation, and severe pulmonary edema. the treatment aims to reduce inflammation, reduce inflammation, and prevent complications. take amoxicillin with clafolanic acid 25 times a day twice a day a week for 5 days. if prescribed, complete the course. take baracitamol 500 times every 6-8 hours if you have a fever or pain in the face. do not exceed the prescribed dose. use saline solution 3-4 times a day to clean the pulmonary arteries. take levocetirizine 5 times a night to reduce sensitivity and ease the pulmonary edema. do a water bath 3 times a day to reduce fatigue and pressure in the pulmonary arteries. drink a lot of warm liquids and take enough rest. avoid exposure to cold air, dust, or strong smells. try to keep your head up a l...
+2026-02-24 20:25:13,431 - INFO - Running advanced extraction on 1386 chars...
+2026-02-24 20:25:13,431 - INFO - Transcript begins: Hello. one of the symptoms is acute pulmonary inflammation, which is inflammation and swelling in the pulmonary arteries and pulmonary veins. it often...
+2026-02-24 20:25:13,431 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-24 20:25:19,291 - INFO - [OK] Groq extraction: 4 medicines, 2 diagnoses
+2026-02-24 20:25:19,291 - INFO - Pre-improvement: medicines=4, diagnosis=2
+2026-02-24 20:25:19,291 - INFO - Post-improvement: medicines=4, diagnosis=2
+2026-02-24 20:25:19,291 - INFO - Validation: [OK] PASSED (0 errors, 4 warnings)
