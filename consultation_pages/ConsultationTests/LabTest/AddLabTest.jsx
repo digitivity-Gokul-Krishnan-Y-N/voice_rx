@@ -88,6 +88,24 @@ const AddLabTest = ({ extractedData = null }) => {
   return (
     <div className="row g-3">
 
+      {/* Auto-filled tests from extracted data */}
+      {extractedTests.length > 0 && (
+        <div className="col-12">
+          <div className="alert alert-info bg-bl4 border-0">
+            <h6 className="fw-b c-dg mb-2">✓ Tests from consultation:</h6>
+            <div className="row g-2">
+              {extractedTests.map((test, idx) => (
+                <div key={idx} className="col-md-4">
+                  <div className="card bg-white border p-2">
+                    <small><strong>{test.name || test}</strong></small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Test Type */}
       <div className="col-md-6">
         <DropdownField
