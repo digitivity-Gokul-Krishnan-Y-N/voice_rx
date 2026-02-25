@@ -1,0 +1,4 @@
+Test input: Marhaba Sara with Arabic greeting
+Function output: سارة،
+Output repr: 'سارة،'
+Is ASCII: False

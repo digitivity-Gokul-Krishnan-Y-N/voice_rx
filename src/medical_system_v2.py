@@ -90,6 +90,14 @@ class AdvancedExtractor:
         data = result.get('data', {})
         logger.info(f"Pre-improvement: medicines={len(data.get('medicines', []))}, diagnosis={len(data.get('diagnosis', []))}")
         
+        # Post-process patient name (try regex-based extraction if Groq returned Arabic name or None)
+        patient_name = data.get('patient_name')
+        if not patient_name or any(ord(c) > 127 for c in (patient_name or '')):  # If None or contains non-ASCII
+            regex_name = self._extract_patient_name(transcript)
+            if regex_name and not any(ord(c) > 127 for c in regex_name):  # Only use if it's Latin-based
+                data['patient_name'] = regex_name
+                logger.info(f"[NAME] Extracted from regex: {regex_name}")
+        
         data['medicines'] = self._improve_medicines(data.get('medicines', []), transcript)
         data['diagnosis'] = self._improve_diagnosis(data.get('diagnosis', []), transcript)
         data['advice'] = self._extract_advice(transcript)
@@ -123,8 +131,9 @@ class AdvancedExtractor:
         }
 
     def _extract_patient_name(self, text: str) -> Optional[str]:
-        """Extract patient name from text"""
-        # Try to find name in common patterns
+        """Extract patient name from text - supports English, Arabic, and Thanglish greetings"""
+        
+        # English patterns
         patterns = [
             r'patient\s+(?:named?|is)?\s+([A-Za-z]+)',
             r'(?:hi|hello|hey|like|ok)\s+([A-Z][a-z]+)',  # Greeting/Filler + Name
@@ -139,6 +148,64 @@ class AdvancedExtractor:
                 name = match.group(1)
                 # Filter out common filler words and small words
                 if len(name) > 1 and name.lower() not in ['you', 'the', 'this', 'that', 'with', 'have', 'your']:
+                    return name.capitalize()
+        
+        # Arabic greeting patterns - extract both greeting and name
+        # Common Arabic names with English transliterations
+        name_mappings = {
+            'سارة': 'Sarah',
+            'محمد': 'Muhammad',
+            'علي': 'Ali',
+            'فاطمة': 'Fatima',
+            'أحمد': 'Ahmad',
+            'عائشة': 'Aisha',
+            'حسن': 'Hassan',
+            'نور': 'Noor',
+            'زيد': 'Zaid',
+            'ليلى': 'Layla',
+        }
+        
+        # Arabic greeting pattern:  "مرحبا [NAME]" - matches English name or Arabic name
+        ar_greeting_pattern = r'مرحبا[ً]?\s+([A-Za-zء-ي]+)'  # Combined pattern for both English and Arabic
+        
+        match = re.search(ar_greeting_pattern, text)
+        if match:
+            name = match.group(1).strip()
+            if len(name) > 1:
+                # If it matches an Arabic name with comma, remove comma
+                if name.endswith('،'):
+                    name = name[:-1]
+                
+                # Check if this is an Arabic name and try to transliterate
+                if any(ord(c) in range(0x0600, 0x06FF) for c in name):
+                    # Try exact match first
+                    if name in name_mappings:
+                        return name_mappings[name]
+                    # Try normalized comparison (strip extra characters)
+                    for ar_name, en_name in name_mappings.items():
+                        if name.strip() == ar_name.strip() or name.rstrip('،') == ar_name:
+                            return en_name
+                    # If no mapping found, still return Arabic (name not transliterated)
+                    return name
+                else:
+                    # English name, capitalize and return
+                    return name.capitalize()
+        
+        # Also try other Arabic greetings 
+        other_patterns = [
+            (r'السلام\s+عليكم\s+([A-Za-zء-ي]+)', 'Assalam alaikum'),
+            (r'صباح\s+الخير\s+([A-Za-zء-ي]+)', 'Sabah al-khair'),
+        ]
+        
+        for pattern, desc in other_patterns:
+            match = re.search(pattern, text)
+            if match:
+                name = match.group(1).strip()
+                if len(name) > 1:
+                    if name in name_mappings:
+                        return name_mappings[name]
+                    if any(ord(c) in range(0x0600, 0x06FF) for c in name):
+                        return name  # Return Arabic if no mapping
                     return name.capitalize()
         
         # Fallback: find first capitalized word that's not a common word
@@ -360,50 +427,127 @@ class AdvancedExtractor:
         return diagnoses[:5]
 
     def _extract_advice(self, text: str) -> List[str]:
-        """Extract or generate advice"""
+        """Extract or generate advice - supports English, Arabic, and Thanglish"""
         text_lower = text.lower()
         advice = []
+        found_advice = set()
         
-        advice_keywords = {
-            0: ['food', 'stomach', 'discomfort', 'after food', 'apram'],
-            1: ['course', 'complete'],
-            2: ['drink', 'plenty', 'warm', 'fluids', 'kudichuko', 'kurichiko'],
-            3: ['gargle', 'salt water'],
-            4: ['cold', 'drink', 'cold drinks'],
-            5: ['spicy', 'food', 'spicy food'],
-            6: ['oily', 'food', 'oily food'],
-            7: ['rest', 'voice', 'rest your'],
-            8: ['side effect', 'nausea', 'mild side'],
-            9: ['severe', 'diarrhea'],
-            10: ['follow', 'review', 'vaa'],
-            11: ['fever', 'persist', 'fever for'],
+        # Arabic advice keywords - match actual sentences from transcript
+        arabic_advice_patterns = {
+            r'اشرب.*ماء|شرب.*ماء': 'drink plenty of fluids',
+            r'تناول.*بعد.*طعام|بعد الأكل': 'take with food',
+            r'تجنب.*بارد|الأطعمة الباردة': 'avoid cold drinks and food',
+            r'تجنب.*حار|الطعام الحار': 'avoid spicy food',
+            r'استريح': 'get adequate rest',
+            r'غرغر.*ماء.*ملح|الغرغرة': 'gargle with salt water',
+            r'لا\s+تؤخر.*طبيب|مراجعة\s+الطبيب': 'consult doctor if symptoms persist',
+            r'راقب.*الأعراض|مراقبة': 'monitor symptoms',
+            r'إكمال\s+العلاج|أكمل.*مدة|تمام المدة': 'complete full course of treatment',
+            r'قبل\s+النوم': 'take before bedtime',
         }
         
+        # Check Arabic patterns
+        for pattern, advice_text in arabic_advice_patterns.items():
+            if re.search(pattern, text, re.IGNORECASE):
+                if advice_text not in found_advice:
+                    advice.append(advice_text)
+                    found_advice.add(advice_text)
+                    logger.debug(f"[ADVICE] Found Arabic advice: {advice_text}")
+        
+        # English advice keywords
+        advice_keywords = {
+            0: ['food', 'stomach', 'discomfort', 'after food', 'apram'],
+            1: ['course', 'complete', 'full course'],
+            2: ['drink', 'plenty', 'warm', 'fluids', 'water', 'kudichuko', 'kurichiko'],
+            3: ['gargle', 'salt water'],
+            4: ['cold', 'drink', 'cold drinks', 'avoid cold'],
+            5: ['spicy', 'food', 'spicy food'],
+            6: ['oily', 'food', 'oily food'],
+            7: ['rest', 'voice', 'rest your', 'adequate rest'],
+            8: ['side effect', 'nausea', 'mild side'],
+            9: ['severe', 'diarrhea'],
+            10: ['follow', 'review', 'doctor', 'consult'],
+            11: ['fever', 'persist', 'fever for', 'symptoms persist'],
+        }
+        
+        # Check English patterns
         for idx, keywords_list in advice_keywords.items():
             if any(k in text_lower for k in keywords_list):
-                advice.append(STANDARD_ADVICE[idx])
+                if idx < len(STANDARD_ADVICE):
+                    advice_text = STANDARD_ADVICE[idx]
+                    if advice_text not in found_advice:
+                        advice.append(advice_text)
+                        found_advice.add(advice_text)
+                        logger.debug(f"[ADVICE] Found advice: {advice_text}")
         
-        # If no advice found, generate basics
-        if not advice and any(k in text_lower for k in ['throat', 'infection', 'fever']):
-            advice = [
-                STANDARD_ADVICE[2],  # Drink warm fluids
-                STANDARD_ADVICE[3],  # Gargle
-                STANDARD_ADVICE[4],  # Avoid cold
-                STANDARD_ADVICE[5],  # Avoid spicy
+        # If we found explicit advice in text, return it
+        if advice:
+            return advice[:12]
+        
+        # Fallback: generate common advice for throat/fever conditions
+        if any(k in text_lower for k in ['throat', 'infection', 'fever', 'cough']):
+            fallback_advice = [
+                'drink plenty of fluids',
+                'gargle with salt water',
+                'avoid cold drinks and food',
+                'get adequate rest',
+                'take medicine as prescribed',
             ]
+            return fallback_advice[:5]
         
         return advice[:12]
 
     def _improve_medicines(self, medicines: List, text: str) -> List[Dict]:
-        """Post-process medicines list - extract if empty"""
+        """Post-process medicines list - extract if empty, fix lozenge/spray doses"""
         # If we already have medicines, return them
         if isinstance(medicines, list) and len(medicines) > 0:
             if isinstance(medicines[0], dict):
+                # Clean up hallucinated doses (e.g., lozenges shouldn't have "1 mg")
+                medicines = self._fix_formulation_doses(medicines)
                 return medicines
         
         # Otherwise, extract from text with improved method
         extracted = self._extract_medicines_advanced(text)
+        if extracted:
+            extracted = self._fix_formulation_doses(extracted)
         return extracted if extracted else medicines
+
+    def _fix_formulation_doses(self, medicines: List[Dict]) -> List[Dict]:
+        """Fix doses for lozenges, sprays, syrups - they shouldn't have hallucinated mg doses"""
+        fixed = []
+        
+        for med in medicines:
+            med = dict(med)  # Make a copy to avoid modifying original
+            name_lower = med.get('name', '').lower()
+            dose = med.get('dose')
+            dose_lower = (dose or '').lower()  # Handle None dose
+            
+            # Check if this is a non-tablet formulation
+            is_lozenge = 'lozenge' in name_lower or 'throat' in name_lower
+            is_spray = 'spray' in name_lower or 'nasal' in name_lower
+            is_syrup = 'syrup' in name_lower or 'liquid' in name_lower
+            is_topical = 'cream' in name_lower or 'gel' in name_lower or 'ointment' in name_lower
+            
+            # Fix doses for these formulations
+            if is_lozenge and dose_lower and '1 mg' in dose_lower:
+                # Lozenges don't have "mg" - replace with "1 lozenge" or "as directed"
+                med['dose'] = 'as directed'
+            elif is_spray and dose_lower and '1 mg' in dose_lower:
+                # Sprays typically use spray count or ml
+                med['dose'] = '1-2 sprays' if 'frequency' not in med or '1 times' in med.get('frequency', '') else med['dose']
+            elif is_syrup and dose_lower and '1 mg' in dose_lower:
+                # Syrups use ml, not mg
+                med['dose'] = '5-10 ml' if not any(c.isdigit() for c in dose_lower.split()[0]) else med['dose']
+            elif is_topical and dose_lower and '1 mg' in dose_lower:
+                # Topicals use application instructions instead
+                med['dose'] = 'apply as directed'
+            elif dose_lower and 'mg' not in dose_lower and dose_lower and dose_lower != 'unit':
+                # If dose exists but has no unit and doesn't look like a real dose, keep as is
+                pass
+            
+            fixed.append(med)
+        
+        return fixed
 
     def _improve_diagnosis(self, diagnoses: List[str], text: str) -> List[str]:
         """Post-process diagnosis list - extract if empty"""

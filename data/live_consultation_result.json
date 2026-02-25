@@ -1,66 +1,55 @@
 {
   "success": true,
-  "patient_name": null,
+  "patient_name": "Acute",
   "complaints": [
-    "burning urination",
-    "frequent urination",
-    "lower abdominal pain"
+    "stomach pain",
+    "vomiting",
+    "fever",
+    "diarrhea"
   ],
   "diagnosis": [
-    "urinary tract infection"
+    "acute gastroenteritis"
   ],
   "medicines": [
     {
-      "name": "stayhappi nitrofurantoin tablet",
+      "name": "ondansetron",
+      "dose": "4 mg",
+      "frequency": "every 8 hours",
+      "duration": null,
+      "instruction": null,
+      "route": "oral",
+      "side_effects": []
+    },
+    {
+      "name": "rescatotril",
       "dose": "100 mg",
-      "frequency": "2 times a day",
-      "duration": "5 days",
-      "instruction": "after food",
-      "route": "oral",
-      "side_effects": []
-    },
-    {
-      "name": "paracetamol",
-      "dose": "500 mg",
-      "frequency": "as needed",
+      "frequency": "3 times a day",
       "duration": null,
-      "instruction": "as needed",
+      "instruction": "before meals",
       "route": "oral",
       "side_effects": []
     },
     {
-      "name": "lopassium tablet",
-      "dose": null,
-      "frequency": "2 times a day",
-      "duration": null,
-      "instruction": "dissolved in water",
-      "route": "oral",
-      "side_effects": []
-    },
-    {
-      "name": "ciprobiotic tablet",
+      "name": "probiotic",
       "dose": "1 mg",
       "frequency": "once a day",
       "duration": null,
-      "instruction": "after food",
-      "route": "oral",
-      "side_effects": []
-    },
-    {
-      "name": "vitamin-c",
-      "dose": "1 mg",
-      "frequency": "once a day",
-      "duration": null,
-      "instruction": "to support immunity",
+      "instruction": null,
       "route": "oral",
       "side_effects": []
     }
   ],
   "tests": [],
-  "advice": [],
-  "language": "ar",
-  "confidence": 0.8643588235294118,
+  "advice": [
+    "Take medicine after food to avoid stomach discomfort",
+    "Drink plenty of warm fluids",
+    "Avoid very cold drinks",
+    "Contact doctor if you develop severe diarrhea, vomiting, skin rash, itching, swelling, or difficulty breathing",
+    "If fever persists beyond 2-3 days or if you have difficulty swallowing or breathing, seek medical attention"
+  ],
+  "language": "ta",
+  "confidence": 0.8254347826086956,
   "extraction_method": "groq",
-  "processing_time_sec": 77.012095,
+  "processing_time_sec": 127.133582,
   "route": "groq_only"
 }
