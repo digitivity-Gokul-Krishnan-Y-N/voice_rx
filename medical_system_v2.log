@@ -1015,3 +1015,38 @@
 2026-02-25 10:14:25,795 - INFO - [NAME] Extracted from regex: Acute
 2026-02-25 10:14:25,812 - INFO - Post-improvement: medicines=3, diagnosis=1
 2026-02-25 10:14:25,852 - INFO - Validation: [OK] PASSED (0 errors, 0 warnings)
+2026-02-25 12:30:38,024 - INFO - 
+================================================================================
+2026-02-25 12:30:38,034 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-25 12:30:38,034 - INFO - ================================================================================
+2026-02-25 12:30:38,972 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-25 12:30:38,973 - INFO - Groq API key detected
+2026-02-25 12:30:38,988 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-25 12:30:40,082 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-25 12:30:40,082 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-25 12:30:40,084 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-25 12:30:40,105 - INFO - [OK] System ready with advanced extraction
+
+2026-02-25 12:30:40,109 - INFO - [DETECT] Probing audio for language detection (no language hint)...
+2026-02-25 12:30:52,765 - INFO - [DETECT] Whisper detected language: 'arabic'
+2026-02-25 12:30:52,770 - INFO - [DETECT] Probe text sample: إلى اتهاب الشعب الهوائي الحاد وهو اتهاب في الممرات الهوائية يسبب السعال المستمر البلغم وضيقا خفيفا ف
+2026-02-25 12:30:52,773 - INFO - [DETECT] Whisper detected 'arabic' → mapped to 'ar'
+2026-02-25 12:30:52,777 - INFO - [WHISPER] Transcribing as 'ar' (whisper_lang='ar')
+2026-02-25 12:30:52,777 - INFO - [WHISPER] Arabic transcription (native): using 'ar' language code
+2026-02-25 12:31:20,874 - INFO - [WHISPER] Raw transcript (566 chars): الطبيب يوصي بالأدوية. تناول باراسيتامول خمسين ملاغة كل ست إلى ثمانة ساعات عند الحاجة لتخفيف الحمى أو الألم. استخدم شراب ...
+2026-02-25 12:31:20,881 - WARNING - [QUALITY] No medical keywords detected
+2026-02-25 12:31:20,881 - INFO - [OK] Transcribed (566 chars, 96 words) [lang=ar]
+2026-02-25 12:31:20,889 - INFO - [EN] English detected (default)
+2026-02-25 12:31:20,904 - INFO - [NORMALIZE] No normalization needed
+2026-02-25 12:31:20,906 - INFO - Audio Analysis: Quality=89%, Language=ar(95%), Length=566 chars, Words=96
+2026-02-25 12:31:20,906 - INFO - Routing Decision: quality=89%, words=96, confidence=92%, language=ar
+2026-02-25 12:31:20,907 - INFO - [UNCERTAIN] ENSEMBLE: Borderline input → Using Groq + Rules (voting)
+2026-02-25 12:31:20,909 - INFO - [OPTIMIZATION] Ensemble disabled by default for speed. Using Groq-only mode.
+2026-02-25 12:31:20,910 - INFO - Full cleaned transcript for extraction (566 chars): الطبيب يوصي بالأدوية. تناول باراسيتامول خمسين ملاغة كل ست إلى ثمانة ساعات عند الحاجة لتخفيف الحمى أو الألم. استخدم شراب السعال ثلاث مرات يومياً بعد الطعام لتخفيف السعال. قم بعمل استنشاق بخار الماء مرتين يومياً للمساعدة على توسيع الشعب الهوائية وتخفيف الاحتقان. اشرب سواء دافئة بكثرة وتجنب التعرض للهواء البارد أو الغبار. خذ قصطاً كافياً من الراحة وتجنب المجهود الشديد. قد تظهر آثار جانبياً خفيفة مثل الغثيان أو الضراب المعدة. إذا ظهرت صعوبة شديدة في التنفس أو ارتفاع شديد في الحرارة أو لم تتحسن الأعراض خلال خمس أيام، يجب مراجعة الطبيب فوراً. نتمنى لك الشفاء العاجل....
+2026-02-25 12:31:20,911 - INFO - Running advanced extraction on 566 chars...
+2026-02-25 12:31:20,912 - INFO - Transcript begins: الطبيب يوصي بالأدوية. تناول باراسيتامول خمسين ملاغة كل ست إلى ثمانة ساعات عند الحاجة لتخفيف الحمى أو الألم. استخدم شراب السعال ثلاث مرات يومياً بعد ال...
+2026-02-25 12:31:20,912 - INFO - Extracting with Groq (openai/gpt-oss-120b)...
+2026-02-25 12:31:24,005 - INFO - [OK] Groq extraction: 2 medicines, 0 diagnoses
+2026-02-25 12:31:24,006 - INFO - Pre-improvement: medicines=2, diagnosis=0
+2026-02-25 12:31:24,032 - INFO - Post-improvement: medicines=2, diagnosis=2
+2026-02-25 12:31:24,033 - INFO - Validation: [OK] PASSED (0 errors, 2 warnings)

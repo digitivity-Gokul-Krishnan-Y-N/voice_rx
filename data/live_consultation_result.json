@@ -1,55 +1,45 @@
 {
   "success": true,
-  "patient_name": "Acute",
+  "patient_name": null,
   "complaints": [
-    "stomach pain",
-    "vomiting",
     "fever",
-    "diarrhea"
+    "pain",
+    "cough",
+    "shortness of breath"
   ],
   "diagnosis": [
-    "acute gastroenteritis"
+    "fever",
+    "cough"
   ],
   "medicines": [
     {
-      "name": "ondansetron",
-      "dose": "4 mg",
-      "frequency": "every 8 hours",
+      "name": "paracetamol",
+      "dose": "50 mg",
+      "frequency": "every 6-8 hours as needed",
       "duration": null,
-      "instruction": null,
+      "instruction": "as needed",
       "route": "oral",
       "side_effects": []
     },
     {
-      "name": "rescatotril",
-      "dose": "100 mg",
+      "name": "cough syrup",
+      "dose": null,
       "frequency": "3 times a day",
       "duration": null,
-      "instruction": "before meals",
-      "route": "oral",
-      "side_effects": []
-    },
-    {
-      "name": "probiotic",
-      "dose": "1 mg",
-      "frequency": "once a day",
-      "duration": null,
-      "instruction": null,
+      "instruction": "after food",
       "route": "oral",
       "side_effects": []
     }
   ],
   "tests": [],
   "advice": [
-    "Take medicine after food to avoid stomach discomfort",
-    "Drink plenty of warm fluids",
-    "Avoid very cold drinks",
-    "Contact doctor if you develop severe diarrhea, vomiting, skin rash, itching, swelling, or difficulty breathing",
-    "If fever persists beyond 2-3 days or if you have difficulty swallowing or breathing, seek medical attention"
+    "take with food",
+    "avoid cold drinks and food",
+    "consult doctor if symptoms persist"
   ],
-  "language": "ta",
-  "confidence": 0.8254347826086956,
+  "language": "ar",
+  "confidence": 0.8904791666666666,
   "extraction_method": "groq",
-  "processing_time_sec": 127.133582,
-  "route": "groq_only"
+  "processing_time_sec": 43.942358,
+  "route": "ensemble"
 }
