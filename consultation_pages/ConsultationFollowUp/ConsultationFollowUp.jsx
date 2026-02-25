@@ -1,17 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import StatusModal from "../../../Components/StatusModal/SuccessStatus";
 import InputTextField from "../../../Components/Interfaces/InputTextField";
 import Prescription from "./PreviewPrescription";
 import * as html2pdf from "html2pdf.js";
 
-const ConsultationFollowUp = () => {
+const ConsultationFollowUp = ({ extractedData = null }) => {
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
   const [date, setDate] = useState("");
   const [purpose, setPurpose] = useState("");
   const [notes, setNotes] = useState("");
+  const [extractedAdvice, setExtractedAdvice] = useState([]);
+
+  // Auto-fill advice from extracted data
+  useEffect(() => {
+    if (extractedData?.advice?.length > 0) {
+      setExtractedAdvice(extractedData.advice);
+      setNotes(extractedData.advice.join("\n"));
+    }
+  }, [extractedData]);
 
   // 🔹 Reset form
   const resetForm = () => {
@@ -64,6 +73,20 @@ const ConsultationFollowUp = () => {
 
   return (
     <div className="row g-3">
+      {/* Auto-filled advice from extracted data */}
+      {extractedAdvice.length > 0 && (
+        <div className="col-12">
+          <div className="alert alert-warning bg-bl4 border-0">
+            <h6 className="fw-b c-dg mb-2">✓ Advice from consultation:</h6>
+            <ul className="mb-0 ps-3">
+              {extractedAdvice.map((adv, idx) => (
+                <li key={idx}><small>{adv}</small></li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Date */}
       <div className="col-12">
         <div className="col-6">
