@@ -179,3 +179,73 @@
 2026-02-25 17:31:39,249 - INFO -  * Detected change in 'D:\\voice_rx\\src\\routing.py', reloading
 2026-02-25 17:31:39,308 - INFO -  * Detected change in 'D:\\voice_rx\\src\\smart_labeling.py', reloading
 2026-02-25 17:31:39,495 - INFO -  * Detected change in 'D:\\voice_rx\\src\\thanglish_normalizer.py', reloading
+2026-02-25 17:31:45,197 - INFO -  * Restarting with watchdog (windowsapi)
+2026-02-25 17:32:09,399 - INFO - 
+================================================================================
+2026-02-25 17:32:09,403 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-25 17:32:09,433 - INFO - ================================================================================
+2026-02-25 17:32:12,894 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-25 17:32:12,897 - INFO - Groq API key detected
+2026-02-25 17:32:12,934 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-25 17:32:14,413 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-25 17:32:14,425 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-25 17:32:14,430 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-25 17:32:14,448 - INFO - [OK] System ready with advanced extraction
+
+2026-02-25 17:32:14,462 - INFO - 🚀 Starting Medical Consultation API Server...
+2026-02-25 17:32:14,463 - INFO - 📂 Audio directory: D:\voice_rx\consultation_pages\data\audio
+2026-02-25 17:32:14,463 - INFO - 📄 Results file: D:\voice_rx\data\live_consultation_result.json
+2026-02-25 17:32:15,007 - WARNING -  * Debugger is active!
+2026-02-25 17:32:15,023 - INFO -  * Debugger PIN: 117-188-761
+2026-02-25 17:56:05,629 - INFO -  * Detected change in 'D:\\voice_rx\\consultation_pages\\api.py', reloading
+2026-02-25 18:16:35,358 - INFO - 
+================================================================================
+2026-02-25 18:16:35,358 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-25 18:16:35,358 - INFO - ================================================================================
+2026-02-25 18:16:36,029 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-25 18:16:36,029 - INFO - Groq API key detected
+2026-02-25 18:16:36,063 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-25 18:16:38,937 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-25 18:16:38,938 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-25 18:16:38,938 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-25 18:16:38,941 - INFO - [OK] System ready with advanced extraction
+
+2026-02-25 18:16:38,945 - INFO - 🚀 Starting Medical Consultation API Server...
+2026-02-25 18:16:38,945 - INFO - 📂 Audio directory: D:\voice_rx\consultation_pages\data\audio
+2026-02-25 18:16:38,945 - INFO - 📄 Results file: D:\voice_rx\data\live_consultation_result.json
+2026-02-25 18:16:39,022 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.144.137:5000
+2026-02-25 18:16:39,022 - INFO - [33mPress CTRL+C to quit[0m
+2026-02-25 18:16:39,064 - INFO -  * Restarting with watchdog (windowsapi)
+2026-02-25 18:16:41,949 - INFO - 
+================================================================================
+2026-02-25 18:16:41,949 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-25 18:16:41,949 - INFO - ================================================================================
+2026-02-25 18:16:42,988 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-25 18:16:42,989 - INFO - Groq API key detected
+2026-02-25 18:16:43,004 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-25 18:16:44,309 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-25 18:16:44,309 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-25 18:16:44,309 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-25 18:16:44,309 - INFO - [OK] System ready with advanced extraction
+
+2026-02-25 18:16:44,309 - INFO - 🚀 Starting Medical Consultation API Server...
+2026-02-25 18:16:44,327 - INFO - 📂 Audio directory: D:\voice_rx\consultation_pages\data\audio
+2026-02-25 18:16:44,327 - INFO - 📄 Results file: D:\voice_rx\data\live_consultation_result.json
+2026-02-25 18:16:44,358 - WARNING -  * Debugger is active!
+2026-02-25 18:16:45,272 - INFO -  * Debugger PIN: 117-188-761
+2026-02-25 18:17:57,401 - INFO - 127.0.0.1 - - [25/Feb/2026 18:17:57] "GET /api/consultation-data HTTP/1.1" 200 -
+2026-02-25 18:21:54,699 - INFO - 127.0.0.1 - - [25/Feb/2026 18:21:54] "GET /api/consultation-data HTTP/1.1" 200 -
+2026-02-25 18:21:55,208 - INFO - 127.0.0.1 - - [25/Feb/2026 18:21:55] "GET /api/consultation-data HTTP/1.1" 200 -
+2026-02-25 18:24:31,640 - INFO - 127.0.0.1 - - [25/Feb/2026 18:24:31] "OPTIONS /api/start-consultation HTTP/1.1" 200 -
+2026-02-25 18:24:31,678 - INFO - 📍 Consultation started: D:\voice_rx\consultation_pages\data\audio\consultation_20260225_182431.wav
+2026-02-25 18:24:31,678 - INFO - 127.0.0.1 - - [25/Feb/2026 18:24:31] "POST /api/start-consultation HTTP/1.1" 200 -
+2026-02-25 18:24:35,190 - INFO - 127.0.0.1 - - [25/Feb/2026 18:24:35] "OPTIONS /api/stop-consultation HTTP/1.1" 200 -
+2026-02-25 18:24:35,410 - ERROR - ❌ Audio file not found: D:\voice_rx\consultation_pages\data\audio\consultation_20260225_182431.wav
+2026-02-25 18:24:35,410 - INFO - 127.0.0.1 - - [25/Feb/2026 18:24:35] "[31m[1mPOST /api/stop-consultation HTTP/1.1[0m" 400 -
+2026-02-25 18:30:39,840 - INFO - 127.0.0.1 - - [25/Feb/2026 18:30:39] "GET /api/consultation-data HTTP/1.1" 200 -
+2026-02-25 18:30:40,358 - INFO - 127.0.0.1 - - [25/Feb/2026 18:30:40] "GET /api/consultation-data HTTP/1.1" 200 -
+2026-02-25 18:30:56,974 - INFO -  * Detected change in 'D:\\voice_rx\\consultation_pages\\api.py', reloading
+2026-02-25 18:30:57,001 - INFO -  * Detected change in 'D:\\voice_rx\\consultation_pages\\api.py', reloading

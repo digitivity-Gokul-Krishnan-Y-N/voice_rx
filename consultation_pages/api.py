@@ -174,6 +174,54 @@ def get_status():
     })
 
 
+@app.route("/api/process-audio", methods=["POST"])
+def api_process_audio():
+    """Process uploaded audio file from React frontend"""
+    try:
+        if "audio" not in request.files:
+            logger.error("❌ No audio file provided")
+            return jsonify({"error": "No audio file provided"}), 400
+
+        audio_file = request.files["audio"]
+        if audio_file.filename == "":
+            return jsonify({"error": "No file selected"}), 400
+
+        # Save uploaded audio
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        audio_path = AUDIO_DIR / f"react_upload_{timestamp}.webm"
+        audio_path.parent.mkdir(parents=True, exist_ok=True)
+        audio_file.save(str(audio_path))
+
+        logger.info(f"📍 Processing uploaded audio from React: {audio_path}")
+
+        # Process with medical system if available
+        if medical_system:
+            result = medical_system.process(str(audio_path))
+  # Save result to JSON file
+            RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+            with open(RESULTS_FILE, "w", encoding="utf-8") as f:
+                json.dump(result, f, indent=2, ensure_ascii=False)
+            
+            return jsonify({"prescription": result})
+        else:
+            # Return mock data if medical system not available
+            mock_result = {
+                "patient_name": "Patient",
+                "age": 35,
+                "gender": "Male",
+                "complaints": ["Not available"],
+                "diagnosis": ["Unable to process"],
+                "medicines": [],
+                "tests": [],
+                "advice": ["Please try again"]
+            }
+            return jsonify({"prescription": mock_result})
+
+    except Exception as e:
+        logger.error(f"❌ Error processing audio: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
 # ============= Frontend HTML endpoints (no /api prefix) =============
 
 @app.route("/process-audio", methods=["POST"])
