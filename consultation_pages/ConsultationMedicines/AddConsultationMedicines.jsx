@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InputTextField from "../../../Components/Interfaces/InputTextField";
 import FormActionButtons from "../../../Components/Interfaces/FormActionButtons";
 import StatusModal from "../../../Components/StatusModal/SuccessStatus";
@@ -6,7 +6,7 @@ import DropdownField from "../../../Components/Interfaces/DropdownField";
 import AddMoreDropdown from "../../../Components/Interfaces/AddMoreDropdown";
 import ConsultationMedList from "./ConsultationMedList";
 
-const ConsultationMedicines = () => {
+const ConsultationMedicines = ({ extractedData = null }) => {
   const [durationUnit, setDurationUnit] = useState("Days");
   const [durationValue, setDurationValue] = useState("");
   const [instructions, setInstructions] = useState([]);
@@ -16,12 +16,20 @@ const ConsultationMedicines = () => {
   const [medicine, setMedicine] = useState("");
   const [dosage, setDosage] = useState("");
   const [notes, setNotes] = useState("");
+  const [extractedMedicines, setExtractedMedicines] = useState([]);
 
   const [list, setList] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
 
   const units = ["Days", "Weeks", "Until Next Consultation"];
+
+  // Auto-fill medicines from extracted data
+  useEffect(() => {
+    if (extractedData?.medicines?.length > 0) {
+      setExtractedMedicines(extractedData.medicines);
+    }
+  }, [extractedData]);
 
   // 🔹 Instructions toggle
   const handleInstructionChange = (value) => {
@@ -89,6 +97,27 @@ const ConsultationMedicines = () => {
           Skip
         </a>
       </div>
+
+      {/* Auto-filled medicines from extracted data */}
+      {extractedMedicines.length > 0 && (
+        <div className="col-12">
+          <div className="alert alert-info bg-bl4 border-0">
+            <h6 className="fw-b c-dg mb-2">✓ Medicines from consultation:</h6>
+            <div className="row g-2">
+              {extractedMedicines.map((med, idx) => (
+                <div key={idx} className="col-md-6">
+                  <div className="card bg-white border p-2">
+                    <small><strong>{med.name}</strong></small>
+                    <small className="text-muted">
+                      {med.dose} • {med.frequency}
+                    </small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Medicine */}
       <div className="col-md-6">

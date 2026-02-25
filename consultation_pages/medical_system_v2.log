@@ -1,0 +1,64 @@
+2026-02-25 15:01:32,555 - INFO - 
+================================================================================
+2026-02-25 15:01:32,618 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-25 15:01:32,618 - INFO - ================================================================================
+2026-02-25 15:01:33,168 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-25 15:01:33,168 - INFO - Groq API key detected
+2026-02-25 15:01:33,184 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-25 15:01:38,141 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-25 15:01:38,144 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-25 15:01:38,144 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-25 15:01:38,154 - INFO - [OK] System ready with advanced extraction
+
+2026-02-25 15:01:38,156 - INFO - 🚀 Starting Medical Consultation API Server...
+2026-02-25 15:01:38,156 - INFO - 📂 Audio directory: D:\voice_rx\consultation_pages\data\audio
+2026-02-25 15:01:38,156 - INFO - 📄 Results file: D:\voice_rx\consultation_pages\data\live_consultation_result.json
+2026-02-25 15:01:38,263 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.144.137:5000
+2026-02-25 15:01:38,263 - INFO - [33mPress CTRL+C to quit[0m
+2026-02-25 15:01:38,303 - INFO -  * Restarting with watchdog (windowsapi)
+2026-02-25 15:01:42,417 - INFO - 
+================================================================================
+2026-02-25 15:01:42,417 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-25 15:01:42,419 - INFO - ================================================================================
+2026-02-25 15:01:42,792 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-25 15:01:42,797 - INFO - Groq API key detected
+2026-02-25 15:01:42,812 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-25 15:01:43,288 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-25 15:01:43,288 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-25 15:01:43,288 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-25 15:01:43,291 - INFO - [OK] System ready with advanced extraction
+
+2026-02-25 15:01:43,294 - INFO - 🚀 Starting Medical Consultation API Server...
+2026-02-25 15:01:43,296 - INFO - 📂 Audio directory: D:\voice_rx\consultation_pages\data\audio
+2026-02-25 15:01:43,296 - INFO - 📄 Results file: D:\voice_rx\consultation_pages\data\live_consultation_result.json
+2026-02-25 15:01:43,331 - WARNING -  * Debugger is active!
+2026-02-25 15:01:43,355 - INFO -  * Debugger PIN: 117-188-761
+2026-02-25 15:01:50,508 - INFO - 127.0.0.1 - - [25/Feb/2026 15:01:50] "GET /api/health HTTP/1.1" 200 -
+2026-02-25 15:04:15,672 - INFO - 127.0.0.1 - - [25/Feb/2026 15:04:15] "[33mGET / HTTP/1.1[0m" 404 -
+2026-02-25 15:04:15,911 - INFO - 127.0.0.1 - - [25/Feb/2026 15:04:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-25 15:05:01,547 - INFO - 127.0.0.1 - - [25/Feb/2026 15:05:01] "[33mGET /consultation HTTP/1.1[0m" 404 -
+2026-02-25 15:07:51,002 - INFO - 127.0.0.1 - - [25/Feb/2026 15:07:51] "[33mGET /api/consultation-data HTTP/1.1[0m" 404 -
+2026-02-25 15:34:50,454 - INFO -  * Detected change in 'D:\\voice_rx\\consultation_pages\\recording_handler.py', reloading
+2026-02-25 15:34:53,254 - INFO -  * Restarting with watchdog (windowsapi)
+2026-02-25 15:35:06,909 - INFO - 
+================================================================================
+2026-02-25 15:35:06,909 - INFO - INITIALIZING PRODUCTION MEDICAL SYSTEM V2 (Advanced Extraction)
+2026-02-25 15:35:06,909 - INFO - ================================================================================
+2026-02-25 15:35:07,823 - INFO - [OK] OpenAI Whisper transcriber initialized (auto language detection enabled)
+2026-02-25 15:35:07,824 - INFO - Groq API key detected
+2026-02-25 15:35:07,838 - INFO - Testing Groq model: openai/gpt-oss-120b...
+2026-02-25 15:35:13,629 - INFO - ✅ Model available: openai/gpt-oss-120b
+2026-02-25 15:35:13,630 - INFO - [OK] Groq initialized - using openai/gpt-oss-120b
+2026-02-25 15:35:13,631 - INFO - [OK] Loaded validation rules from medicine database
+2026-02-25 15:35:13,632 - INFO - [OK] System ready with advanced extraction
+
+2026-02-25 15:35:13,636 - INFO - 🚀 Starting Medical Consultation API Server...
+2026-02-25 15:35:13,636 - INFO - 📂 Audio directory: D:\voice_rx\consultation_pages\data\audio
+2026-02-25 15:35:13,637 - INFO - 📄 Results file: D:\voice_rx\consultation_pages\data\live_consultation_result.json
+2026-02-25 15:35:13,675 - WARNING -  * Debugger is active!
+2026-02-25 15:35:13,682 - INFO -  * Debugger PIN: 117-188-761
+2026-02-25 15:36:50,785 - INFO -  * Detected change in 'D:\\voice_rx\\consultation_pages\\api.py', reloading
+2026-02-25 15:36:51,107 - INFO -  * Restarting with watchdog (windowsapi)

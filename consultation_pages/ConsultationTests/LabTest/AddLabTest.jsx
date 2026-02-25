@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AddMoreDropdownField from "../../../../Components/Interfaces/AddMoreDropdown";
 import DropdownField from "../../../../Components/Interfaces/DropdownField";
 import InputTextField from "../../../../Components/Interfaces/InputTextField";
@@ -9,7 +9,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import TestsList from "../TestsList";
 
-const AddLabTest = () => {
+const AddLabTest = ({ extractedData = null }) => {
   const [durationUnit, setDurationUnit] = useState("Days");
   const [severity, setSeverity] = useState("");
   const [instructions, setInstructions] = useState([]);
@@ -19,12 +19,20 @@ const AddLabTest = () => {
   const [testType, setTestType] = useState("Lab");
   const [selectedDate, setSelectedDate] = useState(null);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [extractedTests, setExtractedTests] = useState([]);
 
   const [openModal, setOpenModal] = useState(false);
   const [openHomeTest, setOpenHomeTest] = useState(false);
   const [showList, setShowList] = useState(false);
   const [openStatus, setOpenStatus] = useState(false);
   const [notes, setNotes] = useState("")
+
+  // Auto-fill tests from extracted data
+  useEffect(() => {
+    if (extractedData?.tests?.length > 0) {
+      setExtractedTests(extractedData.tests);
+    }
+  }, [extractedData]);
   /* ---------------- RESET FORM ---------------- */
   const resetForm = () => {
     setDurationUnit("Days");

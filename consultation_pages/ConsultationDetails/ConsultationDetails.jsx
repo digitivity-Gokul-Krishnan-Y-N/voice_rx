@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InputTextField from "../../../Components/Interfaces/InputTextField";
 import FormActionButtons from "../../../Components/Interfaces/FormActionButtons";
 import StatusModal from "../../../Components/StatusModal/SuccessStatus";
 
-const ConsultationDetails = () => {
+const ConsultationDetails = ({ extractedData = null }) => {
   const [durationUnit, setDurationUnit] = useState("days");
   const [durationValue, setDurationValue] = useState("");
   const [severity, setSeverity] = useState("");
@@ -15,6 +15,21 @@ const ConsultationDetails = () => {
   const [diagnosis, setDiagnosis] = useState("");
 
   const units = ["hours", "days", "weeks", "months"];
+
+  // Auto-fill from extracted data when it arrives
+  useEffect(() => {
+    if (extractedData) {
+      if (extractedData.complaints?.length > 0) {
+        setComplaint(extractedData.complaints.join(", "));
+      }
+      if (extractedData.diagnosis?.length > 0) {
+        setDiagnosis(extractedData.diagnosis.join(", "));
+      }
+      if (extractedData.advice?.length > 0) {
+        setNotes(extractedData.advice.join(", "));
+      }
+    }
+  }, [extractedData]);
 
   // 🔹 Reset all fields
   const resetForm = () => {
