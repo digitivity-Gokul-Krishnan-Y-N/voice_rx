@@ -77,13 +77,13 @@ const Consultation = () => {
 
     switch (activeTab) {
       case "details":
-        return <ConsultationDetails />;
+        return <ConsultationDetails extractedData={extractedData} />;
       case "medicines":
-        return <ConsultationMedicines />;
+        return <ConsultationMedicines extractedData={extractedData} />;
       case "tests":
-        return <ConsultationTests />;
+        return <ConsultationTests extractedData={extractedData} />;
       case "followup":
-        return <ConsultationFollowUp />;
+        return <ConsultationFollowUp extractedData={extractedData} />;
       default:
         return null;
     }
