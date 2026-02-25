@@ -1,5 +1,20 @@
 import logo from "../../../Assets/Images/Images/DigiDoc.svg";
-const Prescription = () => {
+import React from "react";
+
+const Prescription = ({ followupDate = "01/12/2025", consultationDate = "" }) => {
+  // Format dates for display
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const formattedFollowupDate = formatDate(followupDate);
+  const formattedConsultationDate = formatDate(consultationDate);
   const doctor = {
     name: "Dr. Aarvin K. Rao",
     degree: "MBBS",
@@ -394,7 +409,9 @@ const Prescription = () => {
       <div className="col-9">
         <div className="row align-items-end gx-2">
           <div className="col-3">
-            <p className="small mb-1">Date: 01/12/2025</p>
+            <p className="small mb-1">
+              Date: {formattedConsultationDate} to {formattedFollowupDate}
+            </p>
           </div>
 
           <div className="col-4">

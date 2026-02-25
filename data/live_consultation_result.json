@@ -1,21 +1,29 @@
 {
   "success": true,
-  "patient_name": null,
+  "patient_name": "Ahmed",
   "complaints": [
-    "fever",
-    "pain",
     "cough",
-    "shortness of breath"
+    "phlegm",
+    "shortness of breath",
+    "fever"
   ],
   "diagnosis": [
-    "fever",
-    "cough"
+    "acute bronchitis"
   ],
   "medicines": [
     {
+      "name": "azithromycin",
+      "dose": "500 mg",
+      "frequency": "once a day",
+      "duration": "3 days",
+      "instruction": "after food",
+      "route": "oral",
+      "side_effects": []
+    },
+    {
       "name": "paracetamol",
-      "dose": "50 mg",
-      "frequency": "every 6-8 hours as needed",
+      "dose": "500 mg",
+      "frequency": "every 6-9 hours",
       "duration": null,
       "instruction": "as needed",
       "route": "oral",
@@ -38,8 +46,8 @@
     "consult doctor if symptoms persist"
   ],
   "language": "ar",
-  "confidence": 0.8904791666666666,
+  "confidence": 0.8635,
   "extraction_method": "groq",
-  "processing_time_sec": 43.942358,
-  "route": "ensemble"
+  "processing_time_sec": 29.625074,
+  "route": "groq_only"
 }

@@ -9,6 +9,8 @@ const ConsultationFollowUp = ({ extractedData = null }) => {
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
+  // Get today's date for consultation date
+  const [consultationDate] = useState(new Date().toISOString().split('T')[0]);
   const [date, setDate] = useState("");
   const [purpose, setPurpose] = useState("");
   const [notes, setNotes] = useState("");
@@ -177,7 +179,7 @@ const ConsultationFollowUp = ({ extractedData = null }) => {
 
                 <div id="prescription-pdf" className="modal-body p-0">
                   <div className="print-page">
-                    <Prescription />
+                    <Prescription followupDate={date} consultationDate={consultationDate} />
                   </div>
                 </div>
 
