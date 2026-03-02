@@ -44,6 +44,10 @@ COPY consultation_pages ./consultation_pages
 COPY data ./data
 COPY tests ./tests
 
+# Copy documentation and configuration files
+COPY README.md ./
+COPY requirements.txt ./
+
 # Copy built React frontend from builder stage
 COPY --from=frontend-builder /app/frontend/build ./frontend/build
 
