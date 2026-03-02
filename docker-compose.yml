@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  voice-rx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: voice-rx-app
+    ports:
+      - "3000:3000"  # React frontend
+      - "5000:5000"  # Python Flask backend
+      - "8000:8000"  # Alternative backend port
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - FLASK_ENV=production
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Separate frontend container for development
+  frontend-dev:
+    build:
+      context: ./digidoc_v3_consultation
+      dockerfile: Dockerfile.dev
+    container_name: voice-rx-frontend
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./digidoc_v3_consultation/src:/app/src
+      - ./digidoc_v3_consultation/public:/app/public
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+    depends_on:
+      - voice-rx
+    profiles:
+      - dev
+
+volumes:
+  logs:
+  data:
